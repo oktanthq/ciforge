@@ -59,13 +59,13 @@ func mapWorkflowRuns(dtos []workflowRunDTO) []models.Run {
 
 func mapJob(j jobDTO) models.Job {
 	job := models.Job{
-		ID:        fmt.Sprintf("%d", j.ID),
-		RunID:     fmt.Sprintf("%d", j.RunID),
-		Name:      j.Name,
-		Status:    mapRunStatus(j.Status),
-		Result:    mapRunResult(j.Conclusion),
-		URL:       j.HTMLURL,
-		StartedAt: j.StartedAt,
+		ID:         fmt.Sprintf("%d", j.ID),
+		RunID:      fmt.Sprintf("%d", j.RunID),
+		Name:       j.Name,
+		Status:     mapRunStatus(j.Status),
+		Result:     mapRunResult(j.Conclusion),
+		URL:        j.HTMLURL,
+		StartedAt:  j.StartedAt,
 		FinishedAt: j.CompletedAt,
 	}
 
@@ -84,29 +84,29 @@ func mapJobs(dtos []jobDTO) []models.Job {
 	return jobs
 }
 
-func mapArtifact(a artifactDTO, runID string) models.Artifact {
-	artifact := models.Artifact{
-		ID:          fmt.Sprintf("%d", a.ID),
-		Name:        a.Name,
-		Size:        a.SizeInBytes,
-		Expired:     a.Expired,
-		CreatedAt:   a.CreatedAt,
-		ExpiresAt:   a.ExpiresAt,
-		DownloadURL: a.ArchiveDownloadURL,
+func mapArtifact(dto artifactDTO) models.Artifact {
+	var runID int64
+	if dto.WorkflowRun != nil {
+		runID = dto.WorkflowRun.ID
+	}
+
+	return models.Artifact{
+		ID:          dto.ID,
+		RunID:       runID,
+		Name:        dto.Name,
 		Type:        models.ArtifactArchive,
+		Size:        dto.SizeInBytes,
+		Expired:     dto.Expired,
+		CreatedAt:   dto.CreatedAt,
+		ExpiresAt:   dto.ExpiresAt,
+		DownloadURL: dto.ArchiveDownloadURL,
 	}
-
-	if runID != "" {
-		artifact.RunID = runID
-	}
-
-	return artifact
 }
 
-func mapArtifacts(dtos []artifactDTO, runID string) []models.Artifact {
+func mapArtifacts(dtos []artifactDTO) []models.Artifact {
 	artifacts := make([]models.Artifact, len(dtos))
 	for i, dto := range dtos {
-		artifacts[i] = mapArtifact(dto, runID)
+		artifacts[i] = mapArtifact(dto)
 	}
 	return artifacts
 }

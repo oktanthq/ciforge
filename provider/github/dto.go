@@ -56,14 +56,27 @@ type listJobsResponse struct {
 	Jobs       []jobDTO `json:"jobs"`
 }
 
+type runDTO struct {
+	ID               int64  `json:"id"`
+	RepositoryID     int64  `json:"repository_id"`
+	HeadRepositoryID int64  `json:"head_repository_id"`
+	HeadBranch       string `json:"head_branch"`
+	HeadSHA          string `json:"head_sha"`
+}
+
 type artifactDTO struct {
 	ID                 int64      `json:"id"`
+	NodeID             string     `json:"node_id"`
 	Name               string     `json:"name"`
 	SizeInBytes        int64      `json:"size_in_bytes"`
-	CreatedAt          time.Time  `json:"created_at"`
-	Expired            bool       `json:"expired"`
-	ExpiresAt          *time.Time `json:"expires_at"`
+	URL                string     `json:"url"`
 	ArchiveDownloadURL string     `json:"archive_download_url"`
+	Expired            bool       `json:"expired"`
+	CreatedAt          time.Time  `json:"created_at"`
+	ExpiresAt          *time.Time `json:"expires_at"`
+	UpdatedAt          *time.Time `json:"updated_at"`
+	Digest             string     `json:"digest"`
+	WorkflowRun        *runDTO    `json:"workflow_run"`
 }
 
 type listArtifactsResponse struct {
