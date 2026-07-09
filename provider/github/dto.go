@@ -4,6 +4,7 @@ import "time"
 
 type workflowDTO struct {
 	ID        int64     `json:"id"`
+	NodeID    string    `json:"node_id"`
 	Name      string    `json:"name"`
 	Path      string    `json:"path"`
 	State     string    `json:"state"`
@@ -11,11 +12,23 @@ type workflowDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	URL       string    `json:"url"`
 	HTMLURL   string    `json:"html_url"`
+	BadgeURL  string    `json:"badge_url"`
 }
 
 type listWorkflowsResponse struct {
 	TotalCount int           `json:"total_count"`
 	Workflows  []workflowDTO `json:"workflows"`
+}
+
+type workflowDispatchRequest struct {
+	Ref    string         `json:"ref"`
+	Inputs map[string]any `json:"inputs,omitempty"`
+}
+
+type workflowDispatchResponse struct {
+	WorkflowRunID int64  `json:"workflow_run_id"`
+	RunURL        string `json:"run_url"`
+	HTMLURL       string `json:"html_url"`
 }
 
 type workflowRunDTO struct {
@@ -82,4 +95,15 @@ type artifactDTO struct {
 type listArtifactsResponse struct {
 	TotalCount int           `json:"total_count"`
 	Artifacts  []artifactDTO `json:"artifacts"`
+}
+
+type ConcurrencyGroup struct {
+	GroupName      string     `json:"group_name"`
+	GroupURL       string     `json:"group_url"`
+	LastAcquiredAt *time.Time `json:"last_acquired_at"`
+}
+
+type listConcurencyGroups struct {
+	TotalCount        int                `json:"total_count"`
+	ConcurrencyGroups []ConcurrencyGroup `json:"concurrency_groups"`
 }
