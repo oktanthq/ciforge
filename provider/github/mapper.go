@@ -178,3 +178,11 @@ func mapDuration(startedAt, finishedAt *time.Time) time.Duration {
 	}
 	return finishedAt.Sub(*startedAt)
 }
+
+func mapDispatchEvent(dto workflowDispatchResponse) models.DispatchEvent {
+	return models.DispatchEvent{
+		RunID:  dto.WorkflowRunID,
+		RunURL: dto.RunURL,
+		URL:    dto.HTMLURL,
+	}
+}
