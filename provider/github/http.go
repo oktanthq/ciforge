@@ -16,6 +16,27 @@ type apiError struct {
 	DocumentationURL string `json:"documentation_url"`
 }
 
+// do executes an HTTP request against the CIForge API.
+//
+// If body is non-nil, it is JSON-encoded and sent as the request body with
+// the Content-Type header set to application/json.
+//
+// The request is authenticated using the client's configured credentials.
+// Responses with a status code >= 300 are converted into typed errors via
+// handleError.
+//
+// If out is non-nil, the response body is expected to contain JSON and is
+// decoded into out.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - method: HTTP method (GET, POST, PUT, DELETE, etc.).
+//   - path: API endpoint path relative to the client's base URL.
+//   - body: Request payload to be JSON-encoded, or nil.
+//   - out: Destination for the decoded JSON response, or nil.
+//
+// Returns an error if the request cannot be created, executed, the response
+// indicates an API error, or the response JSON cannot be decoded.
 func (c *Client) do(ctx context.Context, method, path string, body, out any) error {
 	url := c.baseURL + path
 
@@ -58,6 +79,23 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 	return nil
 }
 
+// doRaw executes an HTTP request and returns the raw response body.
+//
+// Unlike do, this method does not attempt to decode the response as JSON.
+// It is intended for endpoints that return arbitrary content such as logs,
+// configuration files, archives, or other binary/text data.
+//
+// The request is authenticated using the client's configured credentials.
+// Responses with a status code >= 300 are converted into typed errors via
+// handleError.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - method: HTTP method.
+//   - path: API endpoint path relative to the client's base URL.
+//
+// Returns the response body as a byte slice or an error if the request fails,
+// the API returns an error status, or the response body cannot be read.
 func (c *Client) doRaw(ctx context.Context, method, path string) ([]byte, error) {
 	url := c.baseURL + path
 
@@ -86,6 +124,66 @@ func (c *Client) doRaw(ctx context.Context, method, path string) ([]byte, error)
 	return data, nil
 }
 
+// doRawURL executes an HTTP request against the provided URL and returns the
+// raw response body.
+//
+// Unlike doRaw, this method does not prepend the client's base URL, making it
+// suitable for requests to fully qualified URLs such as artifact download
+// links.
+//
+// The request is authenticated using the client's configured credentials.
+// Responses with a status code >= 300 are converted into typed errors via
+// handleError.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - method: HTTP method.
+//   - url: Fully qualified request URL.
+//
+// Returns the response body as a byte slice or an error if the request fails,
+// the API returns a non-success status, or the response body cannot be read.
+func (c *Client) doRawURL(ctx context.Context, method, url string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	c.setAuthHeaders(req)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, c.handleError(resp)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	return data, nil
+}
+
+// handleError converts a non-success HTTP response into a typed Go error.
+//
+// The response body is expected to contain a JSON error object matching
+// apiError. If the body cannot be decoded, the HTTP status text is used as
+// the error message instead.
+//
+// Common API status codes are mapped to package-specific sentinel errors,
+// allowing callers to use errors.Is for error handling.
+//
+// Mappings:
+//   - 401 -> ci.ErrUnauthorized
+//   - 404 -> ci.ErrNotFound
+//   - 429 -> ci.ErrRateLimited
+//
+// All other status codes return an error containing the HTTP status text
+// and the API's error message.
 func (c *Client) handleError(resp *http.Response) error {
 	var apiErr apiError
 	if err := json.NewDecoder(resp.Body).Decode(&apiErr); err != nil {
