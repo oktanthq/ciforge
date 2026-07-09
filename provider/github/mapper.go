@@ -31,9 +31,9 @@ func mapWorkflowRun(r workflowRunDTO) models.Run {
 		ID:         fmt.Sprintf("%d", r.ID),
 		PipelineID: fmt.Sprintf("%d", r.WorkflowID),
 		Number:     r.RunNumber,
-		Status:     mapRunStatus(r.Status),
-		Result:     mapRunResult(r.Conclusion),
-		Trigger:    mapTriggerType(r.Event),
+		Status:     MapRunStatus(r.Status),
+		Result:     MapRunResult(r.Conclusion),
+		Trigger:    MapTriggerType(r.Event),
 		Branch:     r.HeadBranch,
 		CommitSHA:  r.HeadSHA,
 		Message:    r.DisplayTitle,
@@ -62,8 +62,8 @@ func mapJob(j jobDTO) models.Job {
 		ID:         fmt.Sprintf("%d", j.ID),
 		RunID:      fmt.Sprintf("%d", j.RunID),
 		Name:       j.Name,
-		Status:     mapRunStatus(j.Status),
-		Result:     mapRunResult(j.Conclusion),
+		Status:     MapRunStatus(j.Status),
+		Result:     MapRunResult(j.Conclusion),
 		URL:        j.HTMLURL,
 		StartedAt:  j.StartedAt,
 		FinishedAt: j.CompletedAt,
@@ -111,7 +111,7 @@ func mapArtifacts(dtos []artifactDTO) []models.Artifact {
 	return artifacts
 }
 
-func mapRunStatus(status string) models.RunStatus {
+func MapRunStatus(status string) models.RunStatus {
 	switch status {
 	case "queued":
 		return models.RunStatusQueued
@@ -130,7 +130,7 @@ func mapRunStatus(status string) models.RunStatus {
 	}
 }
 
-func mapRunResult(conclusion string) models.RunResult {
+func MapRunResult(conclusion string) models.RunResult {
 	switch conclusion {
 	case "success":
 		return models.RunResultSuccess
@@ -151,7 +151,7 @@ func mapRunResult(conclusion string) models.RunResult {
 	}
 }
 
-func mapTriggerType(event string) models.TriggerType {
+func MapTriggerType(event string) models.TriggerType {
 	switch event {
 	case "push":
 		return models.TriggerPush

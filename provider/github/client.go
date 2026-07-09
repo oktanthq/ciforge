@@ -6,7 +6,7 @@ import (
 	"github.com/abdulahshoaib/ciforge/ci"
 )
 
-const defaultBaseURL = "https://api.github.com"
+const DefaultBaseURL = "https://api.github.com"
 
 type Client struct {
 	token      string
@@ -32,12 +32,20 @@ func New(token string, opts ...Option) *Client {
 	c := &Client{
 		token:      token,
 		httpClient: http.DefaultClient,
-		baseURL:    defaultBaseURL,
+		baseURL:    DefaultBaseURL,
 	}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return c
+}
+
+func (c *Client) BaseURL() string {
+	return c.baseURL
+}
+
+func (c *Client) HTTPClient() *http.Client {
+	return c.httpClient
 }
 
 var _ ci.Provider = (*Client)(nil)

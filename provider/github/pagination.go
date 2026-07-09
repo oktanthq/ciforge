@@ -2,10 +2,10 @@ package github
 
 import "strings"
 
-type pageLinks map[string]string
+type Links map[string]string
 
-func parseLinkHeader(header string) pageLinks {
-	links := make(pageLinks)
+func ParseLinkHeader(header string) Links {
+	links := make(Links)
 	for _, part := range strings.Split(header, ",") {
 		part = strings.TrimSpace(part)
 		if part == "" {
@@ -28,18 +28,18 @@ func parseLinkHeader(header string) pageLinks {
 	return links
 }
 
-func (l pageLinks) Next() string {
+func (l Links) Next() string {
 	return l["next"]
 }
 
-func (l pageLinks) Prev() string {
+func (l Links) Prev() string {
 	return l["prev"]
 }
 
-func (l pageLinks) Last() string {
+func (l Links) Last() string {
 	return l["last"]
 }
 
-func (l pageLinks) First() string {
+func (l Links) First() string {
 	return l["first"]
 }
