@@ -59,16 +59,37 @@ type listWorkflowRunsResponse struct {
 	WorkflowRuns []workflowRunDTO `json:"workflow_runs"`
 }
 
+type stepsDTO struct {
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Conclusion  string `json:"conclusion"`
+	Number      int64  `json:"number"`
+	StartedAt   string `json:"started_at"`
+	CompletedAt string `json:"completed_at"`
+}
+
 type jobDTO struct {
-	ID          int64      `json:"id"`
-	RunID       int64      `json:"run_id"`
-	RunURL      string     `json:"run_url"`
-	Name        string     `json:"name"`
-	Status      string     `json:"status"`
-	Conclusion  string     `json:"conclusion"`
-	StartedAt   *time.Time `json:"started_at"`
-	CompletedAt *time.Time `json:"completed_at"`
-	HTMLURL     string     `json:"html_url"`
+	ID              int64      `json:"id"`
+	RunID           int64      `json:"run_id"`
+	RunURL          string     `json:"run_url"`
+	NodeID          string     `json:"node_id"`
+	HeadSHA         string     `json:"head_sha"`
+	URL             string     `json:"url"`
+	HTMLURL         string     `json:"html_url"`
+	Status          string     `json:"status"`
+	Conclusion      string     `json:"conclusion"`
+	StartedAt       *time.Time `json:"started_at"`
+	CompletedAt     *time.Time `json:"completed_at"`
+	Name            string     `json:"name"`
+	Steps           []stepsDTO `json:"steps"`
+	CheckRunURL     string     `json:"check_run_url"`
+	Labels          []string   `json:"labels"`
+	RunnerID        int64      `json:"runner_id"`
+	RunnerName      string     `json:"runner_name"`
+	RunnerGroupID   int64      `json:"runner_group_id"`
+	RunnerGroupName string     `json:"runner_group_name"`
+	WorkflowName    string     `json:"workflow_name"`
+	HeadBranch      string     `json:"head_branch"`
 }
 
 type listJobsResponse struct {
