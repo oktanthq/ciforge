@@ -32,19 +32,26 @@ type workflowDispatchResponse struct {
 }
 
 type workflowRunDTO struct {
-	ID           int64     `json:"id"`
-	Name         string    `json:"name"`
-	RunNumber    int64     `json:"run_number"`
-	Status       string    `json:"status"`
-	Conclusion   string    `json:"conclusion"`
-	HeadBranch   string    `json:"head_branch"`
-	HeadSHA      string    `json:"head_sha"`
-	DisplayTitle string    `json:"display_title"`
-	Event        string    `json:"event"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	HTMLURL      string    `json:"html_url"`
-	WorkflowID   int64     `json:"workflow_id"`
+	ID               int64     `json:"id"`
+	Name             string    `json:"name"`
+	NodeID           string    `json:"node_id"`
+	CheckSuiteID     int64     `json:"check_suite_id"`
+	CheckSuiteNodeID string    `json:"check_suite_node_id"`
+	HeadBranch       string    `json:"head_branch"`
+	HeadSHA          string    `json:"head_sha"`
+	Path             string    `json:"path"`
+	RunNumber        int64     `json:"run_number"`
+	Event            string    `json:"event"`
+	DisplayTitle     string    `json:"display_title"`
+	Status           string    `json:"status"`
+	Conclusion       string    `json:"conclusion"`
+	WorkflowID       int64     `json:"workflow_id"`
+	URL              string    `json:"url"`
+	HTMLURL          string    `json:"html_url"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+	RunAttempt       int64     `json:"run_attempt"`
+	RunStartedAt     time.Time `json:"run_started_at"`
 }
 
 type listWorkflowRunsResponse struct {
@@ -95,6 +102,44 @@ type artifactDTO struct {
 type listArtifactsResponse struct {
 	TotalCount int           `json:"total_count"`
 	Artifacts  []artifactDTO `json:"artifacts"`
+}
+
+type workflowApprovalDTO struct {
+	State        string           `json:"state"`
+	Comment      string           `json:"comment"`
+	Environments []environmentDTO `json:"environments"`
+	User         userDTO          `json:"user"`
+}
+
+type environmentDTO struct {
+	ID        int64     `json:"id"`
+	NodeID    string    `json:"node_id"`
+	Name      string    `json:"name"`
+	URL       string    `json:"url"`
+	HTMLURL   string    `json:"html_url"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type userDTO struct {
+	Login             string `json:"login"`
+	ID                int64  `json:"id"`
+	NodeID            string `json:"node_id"`
+	AvatarURL         string `json:"avatar_url"`
+	GravatarID        string `json:"gravatar_id"`
+	URL               string `json:"url"`
+	HTMLURL           string `json:"html_url"`
+	FollowersURL      string `json:"followers_url"`
+	FollowingURL      string `json:"following_url"`
+	GistsURL          string `json:"gists_url"`
+	StarredURL        string `json:"starred_url"`
+	SubscriptionsURL  string `json:"subscriptions_url"`
+	OrganizationsURL  string `json:"organizations_url"`
+	ReposURL          string `json:"repos_url"`
+	EventsURL         string `json:"events_url"`
+	ReceivedEventsURL string `json:"received_events_url"`
+	Type              string `json:"type"`
+	SiteAdmin         bool   `json:"site_admin"`
 }
 
 type ConcurrencyGroup struct {
