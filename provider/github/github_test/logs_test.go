@@ -9,7 +9,7 @@ import (
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
-func TestGetLogs(t *testing.T) {
+func TestGetWorkflowRunLogs(t *testing.T) {
 	t.Parallel()
 
 	zipData := createTestZip(map[string]string{
@@ -26,7 +26,7 @@ func TestGetLogs(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	log, err := client.GetLogs(context.Background(), "owner/repo", "100")
+	log, err := client.GetWorkflowRunLogs(context.Background(), "repo", "owner", "100")
 	assertNoError(t, err)
 	assertEqual(t, "100", log.RunID)
 	assertEqual(t, true, len(log.Content) > 0)

@@ -162,14 +162,3 @@ type userDTO struct {
 	Type              string `json:"type"`
 	SiteAdmin         bool   `json:"site_admin"`
 }
-
-type ConcurrencyGroup struct {
-	GroupName      string     `json:"group_name"`
-	GroupURL       string     `json:"group_url"`
-	LastAcquiredAt *time.Time `json:"last_acquired_at"`
-}
-
-type listConcurencyGroups struct {
-	TotalCount        int                `json:"total_count"`
-	ConcurrencyGroups []ConcurrencyGroup `json:"concurrency_groups"`
-}

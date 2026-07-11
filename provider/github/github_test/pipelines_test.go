@@ -11,7 +11,7 @@ import (
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
-func TestListPipelines(t *testing.T) {
+func TestListWorkflows(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,16 +30,16 @@ func TestListPipelines(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("test-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	pipelines, err := client.ListPipelines(context.Background(), "owner/repo")
+	workflows, err := client.ListWorkflows(context.Background(), "repo", "owner")
 	assertNoError(t, err)
-	assertEqual(t, 2, len(pipelines))
-	assertEqual(t, "1", pipelines[0].ID)
-	assertEqual(t, "CI", pipelines[0].Name)
-	assertEqual(t, false, pipelines[0].Disabled)
-	assertEqual(t, true, pipelines[1].Disabled)
+	assertEqual(t, 2, len(workflows))
+	assertEqual(t, "1", workflows[0].ID)
+	assertEqual(t, "CI", workflows[0].Name)
+	assertEqual(t, false, workflows[0].Disabled)
+	assertEqual(t, true, workflows[1].Disabled)
 }
 
-func TestGetPipeline(t *testing.T) {
+func TestGetWorkflow(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,8 +55,8 @@ func TestGetPipeline(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("test-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	pipeline, err := client.GetPipeline(context.Background(), "owner/repo", "42")
+	workflow, err := client.GetWorkflow(context.Background(), "repo", "owner", "42")
 	assertNoError(t, err)
-	assertEqual(t, "42", pipeline.ID)
-	assertEqual(t, "CI", pipeline.Name)
+	assertEqual(t, "42", workflow.ID)
+	assertEqual(t, "CI", workflow.Name)
 }

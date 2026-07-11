@@ -8,7 +8,7 @@ import (
 	"github.com/abdulahshoaib/ciforge/models"
 )
 
-// ListPipelines retrieves all GitHub Actions workflows for a repository.
+// ListWorkflows retrieves all GitHub Actions workflows for a repository.
 //
 // The caller must have read access to the repository. Each workflow is
 // returned as a provider-agnostic Pipeline model.
@@ -22,7 +22,7 @@ import (
 // returns a non-success status.
 //
 // TODO: Support pagination.
-func (c *Client) ListPipelines(ctx context.Context, repo, owner string) ([]models.Pipeline, error) {
+func (c *Client) ListWorkflows(ctx context.Context, repo, owner string) ([]models.Pipeline, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/workflows", owner, repo)
 
 	var resp listWorkflowsResponse
@@ -32,7 +32,7 @@ func (c *Client) ListPipelines(ctx context.Context, repo, owner string) ([]model
 	return mapWorkflows(resp.Workflows), nil
 }
 
-// GetPipeline retrieves a GitHub Actions workflow by its ID or file name.
+// GetWorkflow retrieves a GitHub Actions workflow by its ID or file name.
 //
 // GitHub accepts either the numeric workflow ID or the workflow file name
 // (for example, "build.yml").
@@ -43,9 +43,9 @@ func (c *Client) ListPipelines(ctx context.Context, repo, owner string) ([]model
 //   - repo: Repository name.
 //   - id: Workflow identifier or workflow file name.
 //
-// Returns the requested pipeline or an error if the request fails, the
+// Returns the requested workflow or an error if the request fails, the
 // workflow does not exist, or the API returns a non-success status.
-func (c *Client) GetPipeline(ctx context.Context, repo, owner, id string) (*models.Pipeline, error) {
+func (c *Client) GetWorkflow(ctx context.Context, repo, owner, id string) (*models.Pipeline, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s", owner, repo, id)
 	var resp workflowDTO
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -55,7 +55,7 @@ func (c *Client) GetPipeline(ctx context.Context, repo, owner, id string) (*mode
 	return &p, nil
 }
 
-// DisablePipeline disables a GitHub Actions workflow.
+// DisableWorkflow disables a GitHub Actions workflow.
 //
 // Once disabled, the workflow will no longer be triggered automatically or
 // manually until it is re-enabled.
@@ -68,7 +68,7 @@ func (c *Client) GetPipeline(ctx context.Context, repo, owner, id string) (*mode
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) DisablePipeline(ctx context.Context, repo, owner, workflowID string) error {
+func (c *Client) DisableWorkflow(ctx context.Context, repo, owner, workflowID string) error {
 	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s/disable", owner, repo, workflowID)
 
 	if err := c.do(ctx, http.MethodPut, path, nil, nil); err != nil {
@@ -78,7 +78,7 @@ func (c *Client) DisablePipeline(ctx context.Context, repo, owner, workflowID st
 	return nil
 }
 
-// CreateDispatchEvent manually triggers a GitHub Actions workflow.
+// CreateWorkflowDispatch manually triggers a GitHub Actions workflow.
 //
 // The workflow is dispatched against the specified Git reference. If the
 // workflow defines inputs, they may be supplied in the request body.
@@ -96,7 +96,7 @@ func (c *Client) DisablePipeline(ctx context.Context, repo, owner, workflowID st
 //
 // Returns the dispatched workflow run or an error if the request fails or
 // the API returns a non-success status.
-func (c *Client) CreateDispatchEvent(ctx context.Context, repo, owner, workflowID string, body workflowDispatchRequest) (models.DispatchEvent, error) {
+func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner, workflowID string, body workflowDispatchRequest) (models.DispatchEvent, error) {
 	path := fmt.Sprintf("repos/%s/%s/actions/workflows/%s/dispatches", owner, repo, workflowID)
 
 	var resp workflowDispatchResponse
@@ -107,7 +107,7 @@ func (c *Client) CreateDispatchEvent(ctx context.Context, repo, owner, workflowI
 	return mapDispatchEvent(resp), nil
 }
 
-// EnablePipeline enables a previously disabled GitHub Actions workflow.
+// EnableWorkflow enables a previously disabled GitHub Actions workflow.
 //
 // Once enabled, the workflow may be triggered automatically or manually
 // according to its configured events.
@@ -120,11 +120,11 @@ func (c *Client) CreateDispatchEvent(ctx context.Context, repo, owner, workflowI
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) EnablePipeline(ctx context.Context, repo, owner, workflowID string) error {
-	path := fmt.Sprintf("repos/%s/%s/actions/workflows/%s/enable", owner, repo, workflowID)
+func (c *Client) EnableWorkflow(ctx context.Context, repo, owner, workflowID string) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s/enable", owner, repo, workflowID)
 
 	if err := c.do(ctx, http.MethodPut, path, nil, nil); err != nil {
-		return fmt.Errorf("failed to enable pipeline: %w", err)
+		return fmt.Errorf("failed to enable workflow: %w", err)
 	}
 
 	return nil

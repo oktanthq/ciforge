@@ -7,10 +7,10 @@ import (
 )
 
 type Provider interface {
-	ListPipelines(ctx context.Context, repo string) ([]models.Pipeline, error)
-	GetPipeline(ctx context.Context, repo string, id string) (*models.Pipeline, error)
-	ListRuns(ctx context.Context, repo string, pipeline_id string) ([]models.Run, error)
-	GetRuns(ctx context.Context, repo string, run_id string) (*models.Run, error)
-	CancelRun(ctx context.Context, repo string, run_id string) error
-	RetryRun(ctx context.Context, repo string, run_id string) error
+	ListWorkflows(ctx context.Context, repo, owner string) ([]models.Pipeline, error)
+	GetWorkflow(ctx context.Context, repo, owner, id string) (*models.Pipeline, error)
+	ListRunsForRepo(ctx context.Context, repo, owner string) ([]models.Run, error)
+	GetWorkflowRun(ctx context.Context, repo, owner, runID string) (models.Run, error)
+	CancelWorkflowRun(ctx context.Context, repo, owner, runID string) error
+	ReRunWorkflow(ctx context.Context, repo, owner, runID string) error
 }

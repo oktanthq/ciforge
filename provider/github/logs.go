@@ -12,8 +12,24 @@ import (
 	"github.com/abdulahshoaib/ciforge/models"
 )
 
-func (c *Client) GetLogs(ctx context.Context, repo string, runID string) (*models.Log, error) {
-	path := fmt.Sprintf("/repos/%s/actions/runs/%s/logs", repo, runID)
+// GetWorkflowRunLogs downloads the logs for a workflow run and extracts the
+// contents from the ZIP archive.
+//
+// Unlike DownloadWorkflowRunLogs, which triggers a raw download, this method
+// extracts all log files from the archive and returns them as a single string.
+//
+// The caller must have read access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - runID: Identifier of the workflow run.
+//
+// Returns the extracted log contents or an error if the request fails, the
+// archive cannot be read, or the API returns a non-success status.
+func (c *Client) GetWorkflowRunLogs(ctx context.Context, repo, owner, runID string) (*models.Log, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/logs", owner, repo, runID)
 	data, err := c.doRaw(ctx, http.MethodGet, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download logs: %w", err)

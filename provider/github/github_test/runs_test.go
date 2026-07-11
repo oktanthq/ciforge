@@ -12,11 +12,11 @@ import (
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
-func TestListRuns(t *testing.T) {
+func TestListRunsForRepo(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assertPath(t, r, "/repos/owner/repo/actions/workflows/1/runs")
+		assertPath(t, r, "/repos/owner/repo/actions/runs")
 		assertMethod(t, r, http.MethodGet)
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -35,7 +35,7 @@ func TestListRuns(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	runs, err := client.ListRuns(context.Background(), "owner/repo", "1")
+	runs, err := client.ListRunsForRepo(context.Background(), "repo", "owner")
 	assertNoError(t, err)
 	assertEqual(t, 1, len(runs))
 	assertEqual(t, "100", runs[0].ID)
@@ -44,7 +44,7 @@ func TestListRuns(t *testing.T) {
 	assertEqual(t, models.TriggerPush, runs[0].Trigger)
 }
 
-func TestGetRuns(t *testing.T) {
+func TestGetWorkflowRun(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -62,14 +62,14 @@ func TestGetRuns(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	run, err := client.GetRuns(context.Background(), "owner/repo", "100")
+	run, err := client.GetWorkflowRun(context.Background(), "repo", "owner", "100")
 	assertNoError(t, err)
 	assertEqual(t, "100", run.ID)
 	assertEqual(t, models.RunStatusRunning, run.Status)
 	assertEqual(t, models.TriggerPullRequest, run.Trigger)
 }
 
-func TestCancelRun(t *testing.T) {
+func TestCancelWorkflowRun(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,11 +80,11 @@ func TestCancelRun(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	err := client.CancelRun(context.Background(), "owner/repo", "100")
+	err := client.CancelWorkflowRun(context.Background(), "repo", "owner", "100")
 	assertNoError(t, err)
 }
 
-func TestRetryRun(t *testing.T) {
+func TestReRunWorkflow(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +95,6 @@ func TestRetryRun(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	err := client.RetryRun(context.Background(), "owner/repo", "100")
+	err := client.ReRunWorkflow(context.Background(), "repo", "owner", "100")
 	assertNoError(t, err)
 }

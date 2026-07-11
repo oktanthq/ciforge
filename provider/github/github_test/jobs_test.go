@@ -11,7 +11,7 @@ import (
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
-func TestListJobs(t *testing.T) {
+func TestListJobsForWorkflowRun(t *testing.T) {
 	t.Parallel()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func TestListJobs(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	jobs, err := client.ListJobs(context.Background(), "owner/repo", "100")
+	jobs, err := client.ListJobsForWorkflowRun(context.Background(), "repo", "owner", "100")
 	assertNoError(t, err)
 	assertEqual(t, 2, len(jobs))
 	assertEqual(t, "test", jobs[0].Name)

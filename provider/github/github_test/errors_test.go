@@ -23,7 +23,7 @@ func TestAuthHeaders(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("test-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	_, err := client.ListPipelines(context.Background(), "owner/repo")
+	_, err := client.ListWorkflows(context.Background(), "repo", "owner")
 	assertNoError(t, err)
 }
 
@@ -37,7 +37,7 @@ func TestNotFoundError(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	_, err := client.GetPipeline(context.Background(), "owner/repo", "999")
+	_, err := client.GetWorkflow(context.Background(), "repo", "owner", "999")
 	assertError(t, err)
 }
 
@@ -51,6 +51,6 @@ func TestUnauthorizedError(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("bad-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	_, err := client.ListRuns(context.Background(), "owner/repo", "1")
+	_, err := client.ListRunsForRepo(context.Background(), "repo", "owner")
 	assertError(t, err)
 }
