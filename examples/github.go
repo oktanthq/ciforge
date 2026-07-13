@@ -9,8 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/abdulahshoaib/ciforge/ci"
-	"github.com/abdulahshoaib/ciforge/models"
 	gh "github.com/abdulahshoaib/ciforge/provider/github"
 )
 
@@ -29,11 +27,6 @@ func main() {
 		gh.WithBaseURL("https://github.example.com/api/v3"),
 	)
 
-	// Wrap with ci.Client for provider-agnostic usage
-	ciClient := ci.New(ci.WithProvider(client))
-
-	_ = ciClient
-
 	ctx := context.Background()
 	owner := "owner"
 	repo := "repo"
@@ -44,65 +37,65 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, w := range workflows {
-		fmt.Printf("workflow: %s (id=%s, disabled=%v)\n", w.Name, w.ID, w.Disabled)
+		fmt.Printf("workflow: %s (id=%d, disabled=%v)\n", w.Name, w.ID, w.State != "active")
 	}
 
 	// ── 2. Get a single workflow ───────────────────────────────────
-	workflow, err := client.GetWorkflow(ctx, repo, owner, "12345")
+	workflow, err := client.GetWorkflow(ctx, repo, owner, 12345)
 	if err != nil {
-		if errors.Is(err, ci.ErrNotFound) {
+		if errors.Is(err, gh.ErrNotFound) {
 			fmt.Println("workflow not found")
 		} else {
 			log.Fatal(err)
 		}
 	} else {
-		fmt.Printf("workflow: %s, url: %s\n", workflow.Name, workflow.URL)
+		fmt.Printf("workflow: %s, url: %s\n", workflow.Name, workflow.HTMLURL)
 	}
 
 	// ── 3. List runs for a workflow ─────────────────────────────────
-	runs, err := client.ListRunsForWorkflow(ctx, repo, owner, "12345")
+	runs, err := client.ListRunsForWorkflow(ctx, repo, owner, 12345)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, r := range runs {
 		fmt.Printf("run #%d: status=%s result=%s branch=%s sha=%s\n",
-			r.Number, r.Status, r.Result, r.Branch, r.CommitSHA)
+			r.RunNumber, r.Status, r.Conclusion, r.HeadBranch, r.HeadSHA)
 	}
 
 	// ── 4. Get a single run ────────────────────────────────────────
-	run, err := client.GetWorkflowRun(ctx, repo, owner, "99999")
+	run, err := client.GetWorkflowRun(ctx, repo, owner, 99999)
 	if err != nil {
-		if errors.Is(err, ci.ErrUnauthorized) {
+		if errors.Is(err, gh.ErrUnauthorized) {
 			fmt.Println("bad token")
-		} else if errors.Is(err, ci.ErrRateLimited) {
+		} else if errors.Is(err, gh.ErrRateLimited) {
 			fmt.Println("rate limited — back off")
 		} else {
 			log.Fatal(err)
 		}
 	} else {
-		fmt.Printf("run #%d: %s (took %s)\n", run.Number, run.Result, run.Duration)
+		fmt.Printf("run #%d: %s\n", run.RunNumber, run.Conclusion)
 	}
 
 	// ── 5. Cancel a run ────────────────────────────────────────────
-	if err := client.CancelWorkflowRun(ctx, repo, owner, "99999"); err != nil {
+	if err := client.CancelWorkflowRun(ctx, repo, owner, 99999); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("run cancelled")
 
 	// ── 6. Re-run a workflow ───────────────────────────────────────
-	if err := client.ReRunWorkflow(ctx, repo, owner, "99999"); err != nil {
+	if err := client.ReRunWorkflow(ctx, repo, owner, 99999); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("run re-triggered")
 
 	// ── 7. List jobs in a run ──────────────────────────────────────
-	jobs, err := client.ListJobsForWorkflowRun(ctx, repo, owner, "99999")
+	jobs, err := client.ListJobsForWorkflowRun(ctx, repo, owner, 99999)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, j := range jobs {
 		fmt.Printf("job: %s status=%s result=%s runner=%s\n",
-			j.Name, j.Status, j.Result, j.Runner)
+			j.Name, j.Status, j.Conclusion, j.RunnerName)
 	}
 
 	// ── 8. List artifacts for a run ────────────────────────────────
@@ -111,43 +104,36 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, a := range artifacts {
-		fmt.Printf("artifact: %s size=%d expired=%v\n", a.Name, a.Size, a.Expired)
+		fmt.Printf("artifact: %s size=%d expired=%v\n", a.Name, a.SizeInBytes, a.Expired)
 	}
 
 	// ── 9. Download an artifact ────────────────────────────────────
 	if len(artifacts) > 0 {
-		data, err := client.DownloadArtifact(ctx, artifacts[0].DownloadURL)
+		data, err := client.DownloadArtifact(ctx, artifacts[0].ArchiveDownloadURL)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Printf("downloaded %d bytes\n", len(data))
-		// data is a raw zip — write to file, extract, etc.
 		if err := os.WriteFile("artifact.zip", data, 0644); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// ── 10. Get logs for a run ─────────────────────────────────────
-	logs, err := client.GetWorkflowRunLogs(ctx, repo, owner, "99999")
+	logs, err := client.GetWorkflowRunLogs(ctx, repo, owner, 99999)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("logs for run %s:\n%s\n", logs.RunID, logs.Content)
-
-	// ── Status / Result enums ──────────────────────────────────────
-	_ = models.RunStatusRunning
-	_ = models.RunResultSuccess
-	_ = models.TriggerPush
-	_ = models.ArtifactArchive
+	fmt.Printf("logs:\n%s\n", logs)
 
 	// ── Error handling patterns ─────────────────────────────────────
-	_, err = client.GetWorkflow(ctx, repo, owner, "bad-id")
+	_, err = client.GetWorkflow(ctx, repo, owner, 0)
 	switch {
-	case errors.Is(err, ci.ErrUnauthorized):
+	case errors.Is(err, gh.ErrUnauthorized):
 		fmt.Println("check your token")
-	case errors.Is(err, ci.ErrNotFound):
+	case errors.Is(err, gh.ErrNotFound):
 		fmt.Println("resource does not exist")
-	case errors.Is(err, ci.ErrRateLimited):
+	case errors.Is(err, gh.ErrRateLimited):
 		fmt.Println("slow down")
 	case err != nil:
 		fmt.Println("unexpected:", err)
