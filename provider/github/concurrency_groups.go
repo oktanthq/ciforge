@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/abdulahshoaib/ciforge/models"
 )
 
 // ListConcurrencyGroupsForRepo retrieves all GitHub Actions concurrency groups
@@ -23,15 +21,15 @@ import (
 //
 // Returns a slice of concurrency groups defined for the repository or an error
 // if the request fails or the API returns a non-success status.
-func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner string) ([]models.ConcurencyGroup, error) {
+func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner string) ([]ConcurrencyGroup, error) {
 	path := fmt.Sprintf("repos/%s/%s/actions/concurrency_groups", owner, repo)
 	// TODO(abdulahshoaib): add query params
 
-	var resp listConcurrencyGroups
+	var resp concurrencyGroupListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return []models.ConcurencyGroup{}, fmt.Errorf("failed to list concurrency groups: %w", err)
+		return []ConcurrencyGroup{}, fmt.Errorf("failed to list concurrency groups: %w", err)
 	}
-	return mapConcurencyGroups(resp.ConcurrencyGroups), nil
+	return resp.ConcurrencyGroups, nil
 }
 
 // GetConcurrencyGroupsForRepo retrieves information about a specific GitHub
@@ -46,23 +44,23 @@ func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner s
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - concurrency_group_name: Name of the concurrency group to retrieve.
+//   - concurrencyGroupName: Name of the concurrency group to retrieve.
 //
 // Returns the requested concurrency group or an error if the request fails,
 // the concurrency group does not exist, or the API returns a non-success
 // status.
-func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, concurrency_group_name string) (models.ConcurencyGroup, error) {
-	path := fmt.Sprintf("repo/%s/%s/actions/concurrency_groups/%s", owner, repo, concurrency_group_name)
+func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, concurrencyGroupName string) (ConcurrencyGroup, error) {
+	path := fmt.Sprintf("repos/%s/%s/actions/concurrency_groups/%s", owner, repo, concurrencyGroupName)
 	// TODO(abdulahshoaib): add query params
 
 	var resp ConcurrencyGroup
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return models.ConcurencyGroup{}, fmt.Errorf("failed to get concurrency group{%s}: %w", concurrency_group_name, err)
+		return ConcurrencyGroup{}, fmt.Errorf("failed to get concurrency group{%s}: %w", concurrencyGroupName, err)
 	}
-	return mapConcurencyGroup(resp), nil
+	return resp, nil
 }
 
-// ListConcurrencyGroupsForWorkflow retrieves all concurrency groups associated
+// ListConcurrencyGroupsForWorflow retrieves all concurrency groups associated
 // with a specific GitHub Actions workflow run.
 //
 // Unlike ListConcurrencyGroupsForRepo, which returns all concurrency groups
@@ -75,18 +73,20 @@ func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, c
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns a slice of concurrency groups associated with the workflow run or an
 // error if the request fails or the API returns a non-success status.
-func (c *Client) ListConcurrencyGroupsForWorflow(ctx context.Context, repo, owner, runID string) ([]models.ConcurencyGroup, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/concurrency_groups", owner, repo, runID)
+//
+// TODO(abdulahshoaib): this endpoint doesn't return ConcurrencyGroup, match with the API
+func (c *Client) ListConcurrencyGroupsForWorflow(ctx context.Context, repo, owner string, runID int64) ([]ConcurrencyGroup, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/concurrency_groups", owner, repo, runID)
 	// TODO(abdulahshoaib): add query params
 
-	var resp listConcurrencyGroups
+	var resp concurrencyGroupListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return []models.ConcurencyGroup{}, fmt.Errorf("failed to get concurency group for workflow run{%s}: %w", runID, err)
+		return []ConcurrencyGroup{}, fmt.Errorf("failed to get concurency group for workflow run{%d}: %w", runID, err)
 	}
 
-	return mapConcurencyGroups(resp.ConcurrencyGroups), nil
+	return resp.ConcurrencyGroups, nil
 }
