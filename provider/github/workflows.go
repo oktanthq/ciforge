@@ -4,55 +4,49 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/abdulahshoaib/ciforge/models"
 )
 
 // ListWorkflows retrieves all GitHub Actions workflows for a repository.
 //
 // The caller must have read access to the repository. Each workflow is
-// returned as a provider-agnostic Pipeline model.
+// returned as a Workflow value.
 //
 // Parameters:
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
 //
-// Returns a slice of pipelines or an error if the request fails or the API
+// Returns a slice of workflows or an error if the request fails or the API
 // returns a non-success status.
 //
 // TODO: Support pagination.
-func (c *Client) ListWorkflows(ctx context.Context, repo, owner string) ([]models.Pipeline, error) {
+func (c *Client) ListWorkflows(ctx context.Context, repo, owner string) ([]Workflow, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/workflows", owner, repo)
 
-	var resp listWorkflowsResponse
+	var resp workflowListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list workflows: %w", err)
 	}
-	return mapWorkflows(resp.Workflows), nil
+	return resp.Workflows, nil
 }
 
-// GetWorkflow retrieves a GitHub Actions workflow by its ID or file name.
-//
-// GitHub accepts either the numeric workflow ID or the workflow file name
-// (for example, "build.yml").
+// GetWorkflow retrieves a GitHub Actions workflow by its ID.
 //
 // Parameters:
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - id: Workflow identifier or workflow file name.
+//   - workflowID: Workflow identifier.
 //
 // Returns the requested workflow or an error if the request fails, the
 // workflow does not exist, or the API returns a non-success status.
-func (c *Client) GetWorkflow(ctx context.Context, repo, owner, id string) (*models.Pipeline, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s", owner, repo, id)
-	var resp workflowDTO
+func (c *Client) GetWorkflow(ctx context.Context, repo, owner string, workflowID int64) (Workflow, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d", owner, repo, workflowID)
+	var resp Workflow
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return nil, fmt.Errorf("failed to get workflow: %w", err)
+		return Workflow{}, fmt.Errorf("failed to get workflow: %w", err)
 	}
-	p := mapWorkflow(resp)
-	return &p, nil
+	return resp, nil
 }
 
 // DisableWorkflow disables a GitHub Actions workflow.
@@ -64,12 +58,12 @@ func (c *Client) GetWorkflow(ctx context.Context, repo, owner, id string) (*mode
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - workflowID: Identifier or file name of the workflow to disable.
+//   - workflowID: Identifier of the workflow to disable.
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) DisableWorkflow(ctx context.Context, repo, owner, workflowID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s/disable", owner, repo, workflowID)
+func (c *Client) DisableWorkflow(ctx context.Context, repo, owner string, workflowID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d/disable", owner, repo, workflowID)
 
 	if err := c.do(ctx, http.MethodPut, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to disable workflow: %w", err)
@@ -90,21 +84,25 @@ func (c *Client) DisableWorkflow(ctx context.Context, repo, owner, workflowID st
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - workflowID: Identifier or file name of the workflow to dispatch.
+//   - workflowID: Identifier of the workflow to dispatch.
 //   - body: Dispatch configuration containing the target Git reference and
 //     optional workflow inputs.
 //
-// Returns the dispatched workflow run or an error if the request fails or
+// Returns the dispatched workflow event or an error if the request fails or
 // the API returns a non-success status.
-func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner, workflowID string, body workflowDispatchRequest) (models.DispatchEvent, error) {
-	path := fmt.Sprintf("repos/%s/%s/actions/workflows/%s/dispatches", owner, repo, workflowID)
+func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner string, workflowID int64, body WorkflowDispatchRequest) (WorkflowDispatchEvent, error) {
+	path := fmt.Sprintf("repos/%s/%s/actions/workflows/%d/dispatches", owner, repo, workflowID)
 
 	var resp workflowDispatchResponse
 	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
-		return models.DispatchEvent{}, fmt.Errorf("failed in creating a dispatch event: %w", err)
+		return WorkflowDispatchEvent{}, fmt.Errorf("failed in creating a dispatch event: %w", err)
 	}
 
-	return mapDispatchEvent(resp), nil
+	return WorkflowDispatchEvent{
+		RunID:  resp.WorkflowRunID,
+		RunURL: resp.RunURL,
+		URL:    resp.HTMLURL,
+	}, nil
 }
 
 // EnableWorkflow enables a previously disabled GitHub Actions workflow.
@@ -116,16 +114,42 @@ func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner, workfl
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - workflowID: Identifier or file name of the workflow to enable.
+//   - workflowID: Identifier of the workflow to enable.
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) EnableWorkflow(ctx context.Context, repo, owner, workflowID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s/enable", owner, repo, workflowID)
+func (c *Client) EnableWorkflow(ctx context.Context, repo, owner string, workflowID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d/enable", owner, repo, workflowID)
 
 	if err := c.do(ctx, http.MethodPut, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to enable workflow: %w", err)
 	}
 
 	return nil
+}
+
+// GetWorkflowUsage retrieves the billable usage for a GitHub Actions workflow.
+//
+// The returned usage is grouped by runner operating system and includes the
+// total billable execution time for each runner type across all runs of the
+// specified workflow.
+//
+// The caller must have read access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - workflowID: Identifier of the workflow.
+//
+// Returns the billable usage for the specified workflow or an error if the
+// request fails or the API returns a non-success status.
+func (c *Client) GetWorkflowUsage(ctx context.Context, repo, owner string, workflowID int64) (BillableWorkflow, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d/timing", owner, repo, workflowID)
+
+	var resp BillableWorkflowResponse
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return BillableWorkflow{}, fmt.Errorf("failed to get usage for workflow{%s}: %w", workflowID, err)
+	}
+	return resp.Billable, nil
 }

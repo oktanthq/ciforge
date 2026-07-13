@@ -33,10 +33,10 @@ func TestListWorkflows(t *testing.T) {
 	workflows, err := client.ListWorkflows(context.Background(), "repo", "owner")
 	assertNoError(t, err)
 	assertEqual(t, 2, len(workflows))
-	assertEqual(t, "1", workflows[0].ID)
+	assertEqual(t, int64(1), workflows[0].ID)
 	assertEqual(t, "CI", workflows[0].Name)
-	assertEqual(t, false, workflows[0].Disabled)
-	assertEqual(t, true, workflows[1].Disabled)
+	assertEqual(t, "active", workflows[0].State)
+	assertEqual(t, "disabled", workflows[1].State)
 }
 
 func TestGetWorkflow(t *testing.T) {
@@ -55,8 +55,8 @@ func TestGetWorkflow(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("test-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	workflow, err := client.GetWorkflow(context.Background(), "repo", "owner", "42")
+	workflow, err := client.GetWorkflow(context.Background(), "repo", "owner", 42)
 	assertNoError(t, err)
-	assertEqual(t, "42", workflow.ID)
+	assertEqual(t, int64(42), workflow.ID)
 	assertEqual(t, "CI", workflow.Name)
 }
