@@ -4,11 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+)
 
-	"github.com/abdulahshoaib/ciforge/ci"
+var (
+	ErrUnauthorized = errors.New("unauthorized")
+	ErrNotFound     = errors.New("resource not found")
+	ErrRateLimited  = errors.New("rate limited")
 )
 
 type apiError struct {
@@ -178,9 +183,9 @@ func (c *Client) doRawURL(ctx context.Context, method, url string) ([]byte, erro
 // allowing callers to use errors.Is for error handling.
 //
 // Mappings:
-//   - 401 -> ci.ErrUnauthorized
-//   - 404 -> ci.ErrNotFound
-//   - 429 -> ci.ErrRateLimited
+//   - 401 -> ErrUnauthorized
+//   - 404 -> ErrNotFound
+//   - 429 -> ErrRateLimited
 //
 // All other status codes return an error containing the HTTP status text
 // and the API's error message.
@@ -194,11 +199,11 @@ func (c *Client) handleError(resp *http.Response) error {
 
 	switch resp.StatusCode {
 	case http.StatusUnauthorized:
-		return fmt.Errorf("%w: %s", ci.ErrUnauthorized, msg)
+		return fmt.Errorf("%w: %s", ErrUnauthorized, msg)
 	case http.StatusNotFound:
-		return fmt.Errorf("%w: %s", ci.ErrNotFound, msg)
+		return fmt.Errorf("%w: %s", ErrNotFound, msg)
 	case http.StatusTooManyRequests:
-		return fmt.Errorf("%w: %s", ci.ErrRateLimited, msg)
+		return fmt.Errorf("%w: %s", ErrRateLimited, msg)
 	default:
 		return fmt.Errorf("%s: %s", http.StatusText(resp.StatusCode), msg)
 	}
