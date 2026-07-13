@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/abdulahshoaib/ciforge/models"
 )
 
 // ListRunsForRepo retrieves all GitHub Actions workflow runs for a repository.
@@ -22,15 +20,15 @@ import (
 //
 // Returns a slice of workflow runs or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) ListRunsForRepo(ctx context.Context, repo, owner string) ([]models.Run, error) {
+func (c *Client) ListRunsForRepo(ctx context.Context, repo, owner string) ([]WorkflowRun, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/runs", owner, repo)
 	// TODO(abdullah): Add query params
 
-	var resp listWorkflowRunsResponse
+	var resp workflowRunListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list workflow runs: %w", err)
 	}
-	return mapWorkflowRuns(resp.WorkflowRuns), nil
+	return resp.WorkflowRuns, nil
 }
 
 // GetWorkflowRun retrieves a single GitHub Actions workflow run by its identifier.
@@ -41,18 +39,18 @@ func (c *Client) ListRunsForRepo(ctx context.Context, repo, owner string) ([]mod
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns the requested workflow run or an error if the request fails, the run
 // does not exist, or the API returns a non-success status.
-func (c *Client) GetWorkflowRun(ctx context.Context, repo, owner, runID string) (models.Run, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s", owner, repo, runID)
+func (c *Client) GetWorkflowRun(ctx context.Context, repo, owner string, runID int64) (WorkflowRun, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d", owner, repo, runID)
 
-	var resp workflowRunDTO
+	var resp WorkflowRun
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return models.Run{}, fmt.Errorf("failed to get workflow run: %w", err)
+		return WorkflowRun{}, fmt.Errorf("failed to get workflow run: %w", err)
 	}
-	return mapWorkflowRun(resp), nil
+	return resp, nil
 }
 
 // DeleteWorkflowRun permanently deletes a GitHub Actions workflow run.
@@ -66,12 +64,12 @@ func (c *Client) GetWorkflowRun(ctx context.Context, repo, owner, runID string) 
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the deletion fails or the API returns a non-success
 // status.
-func (c *Client) DeleteWorkflowRun(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s", owner, repo, runID)
+func (c *Client) DeleteWorkflowRun(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodDelete, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to delete workflow run: %w", err)
@@ -90,21 +88,45 @@ func (c *Client) DeleteWorkflowRun(ctx context.Context, repo, owner, runID strin
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns the workflow approval history or an error if the request fails or the
 // API returns a non-success status.
-//
-// TODO(abdulah): create a strategy to store the workflow approvals
-func (c *Client) GetWorkflowRunReviewHistory(ctx context.Context, repo, owner, runID string) ([]workflowApprovalDTO, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/approvals", owner, repo, runID)
+func (c *Client) GetWorkflowRunReviewHistory(ctx context.Context, repo, owner string, runID int64) ([]WorkflowApproval, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/approvals", owner, repo, runID)
 
-	var resp []workflowApprovalDTO
+	var resp []WorkflowApproval
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return []workflowApprovalDTO{}, fmt.Errorf("failed to get review history: %w", err)
+		return []WorkflowApproval{}, fmt.Errorf("failed to get review history: %w", err)
 	}
 
 	return resp, nil
+}
+
+// ApproveWorflowRunForForkPR approves a GitHub Actions workflow run triggered
+// by a pull request from a public fork submitted by a first-time contributor.
+//
+// GitHub may require manual approval before workflows from first-time
+// contributors are allowed to execute. This method approves the pending
+// workflow run.
+//
+// The caller must have write access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - runID: Numeric identifier of the workflow run to approve.
+//
+// Returns an error if the approval request fails or the API returns a
+// non-success status.
+func (c *Client) ApproveWorflowRunForForkPR(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/approve", owner, repo, runID)
+
+	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
+		return fmt.Errorf("failed to approve Run{%d} for a fork PR: %w", runID, err)
+	}
+	return nil
 }
 
 // GetWorkflowRunAttempt retrieves a specific execution attempt of a workflow run.
@@ -118,20 +140,50 @@ func (c *Client) GetWorkflowRunReviewHistory(ctx context.Context, repo, owner, r
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
-//   - attemptNum: Attempt number to retrieve.
+//   - runID: Numeric identifier of the workflow run.
+//   - attemptNum: Numeric attempt number to retrieve.
 //
 // Returns the requested workflow run attempt or an error if the request fails
 // or the API returns a non-success status.
-func (c *Client) GetWorkflowRunAttempt(ctx context.Context, repo, owner, runID, attemptNum string) (models.Run, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/attempts/%s", owner, repo, runID, attemptNum)
+func (c *Client) GetWorkflowRunAttempt(ctx context.Context, repo, owner string, runID, attemptNum int64) (WorkflowRun, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/attempts/%d", owner, repo, runID, attemptNum)
 
-	var resp workflowRunDTO
+	var resp WorkflowRun
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return models.Run{}, fmt.Errorf("failed to get run attempts: %w", err)
+		return WorkflowRun{}, fmt.Errorf("failed to get run attempts: %w", err)
 	}
 
-	return mapWorkflowRun(resp), nil
+	return resp, nil
+}
+
+// DownloadWorkflowRunAttemptLogs downloads the log archive for a specific
+// GitHub Actions workflow run attempt.
+//
+// GitHub returns a temporary redirect to a downloadable archive containing the
+// logs for the requested workflow run attempt. The download URL expires after
+// a short period, but this method automatically follows the redirect and
+// returns the downloaded archive contents.
+//
+// The caller must have read access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - runID: Numeric identifier of the workflow run.
+//   - attemptNum: Numeric attempt number of the workflow run.
+//
+// Returns the downloaded log archive as a byte slice or an error if the request
+// fails or the API returns a non-success status.
+func (c *Client) DownloadWorkflowRunAttemptLogs(ctx context.Context, repo, owner string, runID, attemptNum int64) ([]byte, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/attempts/%d/logs", owner, repo, runID, attemptNum)
+
+	data, err := c.doRaw(ctx, http.MethodGet, path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download workflow run logs: %w", err)
+	}
+
+	return data, nil
 }
 
 // CancelWorkflowRun requests cancellation of an in-progress workflow run.
@@ -144,12 +196,12 @@ func (c *Client) GetWorkflowRunAttempt(ctx context.Context, repo, owner, runID, 
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the cancellation request fails or the API returns a
 // non-success status.
-func (c *Client) CancelWorkflowRun(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/cancel", owner, repo, runID)
+func (c *Client) CancelWorkflowRun(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/cancel", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to cancel workflow run: %w", err)
@@ -169,12 +221,12 @@ func (c *Client) CancelWorkflowRun(ctx context.Context, repo, owner, runID strin
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the force cancellation request fails or the API returns
 // a non-success status.
-func (c *Client) ForceCancelWorkflowRun(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/force-cancel", owner, repo, runID)
+func (c *Client) ForceCancelWorkflowRun(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/force-cancel", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to force cancel workflow run: %w", err)
@@ -194,12 +246,12 @@ func (c *Client) ForceCancelWorkflowRun(ctx context.Context, repo, owner, runID 
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) DownloadWorkflowRunLogs(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/logs", owner, repo, runID)
+func (c *Client) DownloadWorkflowRunLogs(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/logs", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodGet, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to get run logs: %w", err)
@@ -218,12 +270,12 @@ func (c *Client) DownloadWorkflowRunLogs(ctx context.Context, repo, owner, runID
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the request fails or the API returns a non-success
 // status.
-func (c *Client) DeleteWorkflowRunLogs(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/logs", owner, repo, runID)
+func (c *Client) DeleteWorkflowRunLogs(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/logs", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodDelete, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to delete workflow run logs: %w", err)
@@ -243,18 +295,80 @@ func (c *Client) DeleteWorkflowRunLogs(ctx context.Context, repo, owner, runID s
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
-// Returns an error if the request fails or the API returns a non-success
+// Returns the pending deployments or an error if the request fails or the API
+// returns a non-success status.
+func (c *Client) GetPendingDeployments(ctx context.Context, repo, owner string, runID int64) ([]PendingDeployment, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/pending_deployments", owner, repo, runID)
+
+	var resp []PendingDeployment
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get pending deployments on given run{%d}: %w", runID, err)
+	}
+	return resp, nil
+}
+
+// ReviewPendingDeploymentsBody defines the review submitted for one or more
+// pending deployments in a GitHub Actions workflow run.
+//
+// The review specifies the target deployment environments, the review decision,
+// and an optional comment explaining the decision.
+type ReviewPendingDeploymentsBody struct {
+	EnvironmentIDs []int64 `json:"environment_ids"`
+	State          string  `json:"state"`
+	Comment        string  `json:"comment,omitempty"`
+}
+
+// ReviewPendingDeployments reviews one or more pending deployments for a
+// GitHub Actions workflow run.
+//
+// This endpoint approves or rejects pending deployments waiting for deployment
+// protection rules. The request body specifies the target environments, the
+// review state, and an optional review comment.
+//
+// The caller must have write access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - runID: Numeric identifier of the workflow run.
+//   - body: Review details, including the target environment IDs, review
+//     decision, and optional comment.
+//
+// Returns a slice of deployments updated as a result of the review or an error
+// if the request fails or the API returns a non-success status.
+func (c *Client) ReviewPendingDeployments(ctx context.Context, repo, owner string, runID int64, body ReviewPendingDeploymentsBody) ([]Deployment, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/pending_deployments", owner, repo, runID)
+
+	var resp []Deployment
+	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
+		return nil, fmt.Errorf("failed to review pending deployments on workflow run{%d}: %w", runID, err)
+	}
+	return resp, nil
+}
+
+// ReRunWorkflow reruns an entire GitHub Actions workflow run.
+//
+// All jobs in the workflow are executed again regardless of their previous
 // status.
 //
-// TODO(abdullah): handle the incoming data
-func (c *Client) GetPendingDeployments(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/pending_deployments", owner, repo, runID)
+// The caller must have write access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - runID: Numeric identifier of the workflow run.
+//
+// Returns an error if the rerun request fails or the API returns a non-success
+// status.
+func (c *Client) ReRunWorkflow(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/rerun", owner, repo, runID)
 
-	// TODO(abdullah): there is a response to this request, make sure to capture that later
-	if err := c.do(ctx, http.MethodGet, path, nil, nil); err != nil {
-		return fmt.Errorf("failed to get pending deployments on given run{%s}: %w", runID, err)
+	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
+		return fmt.Errorf("failed to rerun workflow run{%d}: %w", runID, err)
 	}
 	return nil
 }
@@ -269,41 +383,45 @@ func (c *Client) GetPendingDeployments(ctx context.Context, repo, owner, runID s
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns an error if the rerun request fails or the API returns a non-success
 // status.
-func (c *Client) ReRunFailedJobs(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/rerun-failed-jobs", owner, repo, runID)
+func (c *Client) ReRunFailedJobs(ctx context.Context, repo, owner string, runID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/rerun-failed-jobs", owner, repo, runID)
 
 	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
-		return fmt.Errorf("failed to rerun failed workflow run{%s}: %w", runID, err)
+		return fmt.Errorf("failed to rerun failed workflow run{%d}: %w", runID, err)
 	}
 	return nil
 }
 
-// ReRunWorkflow reruns an entire GitHub Actions workflow run.
+// GetWorkflowRunUsage retrieves the billable usage for a GitHub Actions
+// workflow run.
 //
-// All jobs in the workflow are executed again regardless of their previous
-// status.
+// The returned usage is grouped by runner operating system and includes the
+// total billable execution time, number of jobs, and per-job execution
+// durations where available.
 //
-// The caller must have write access to the repository.
+// The caller must have read access to the repository.
 //
 // Parameters:
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
-// Returns an error if the rerun request fails or the API returns a non-success
-// status.
-func (c *Client) ReRunWorkflow(ctx context.Context, repo, owner, runID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/rerun", owner, repo, runID)
+// Returns the billable usage for the specified workflow run or an error if the
+// request fails or the API returns a non-success status.
+func (c *Client) GetWorkflowRunUsage(ctx context.Context, repo, owner string, runID int64) (Billable, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/timing", owner, repo, runID)
 
-	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
-		return fmt.Errorf("failed to rerun workflow run{%s}: %w", runID, err)
+	var resp BillableResponse
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return Billable{}, fmt.Errorf("failed to get workflow run{%d} usage: %w", runID, err)
 	}
-	return nil
+
+	return resp.Billable, nil
 }
 
 // ListRunsForWorkflow retrieves all workflow runs for a specific GitHub Actions
@@ -319,16 +437,16 @@ func (c *Client) ReRunWorkflow(ctx context.Context, repo, owner, runID string) e
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - workflowID: Identifier or filename of the workflow.
+//   - workflowID: Numeric identifier of the workflow.
 //
 // Returns a slice of workflow runs associated with the specified workflow or an
 // error if the request fails or the API returns a non-success status.
-func (c *Client) ListRunsForWorkflow(ctx context.Context, repo, owner, workflowID string) ([]models.Run, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%s/runs", owner, repo, workflowID)
+func (c *Client) ListRunsForWorkflow(ctx context.Context, repo, owner string, workflowID int64) ([]WorkflowRun, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d/runs", owner, repo, workflowID)
 
-	var resp listWorkflowRunsResponse
+	var resp workflowRunListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return []models.Run{}, fmt.Errorf("failed to get runs for workflow{%s}: %w", workflowID, err)
+		return []WorkflowRun{}, fmt.Errorf("failed to get runs for workflow{%d}: %w", workflowID, err)
 	}
-	return mapWorkflowRuns(resp.WorkflowRuns), nil
+	return resp.WorkflowRuns, nil
 }
