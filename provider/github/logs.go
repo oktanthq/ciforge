@@ -8,8 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/abdulahshoaib/ciforge/models"
 )
 
 // GetWorkflowRunLogs downloads the logs for a workflow run and extracts the
@@ -24,20 +22,20 @@ import (
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
 //
 // Returns the extracted log contents or an error if the request fails, the
 // archive cannot be read, or the API returns a non-success status.
-func (c *Client) GetWorkflowRunLogs(ctx context.Context, repo, owner, runID string) (*models.Log, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/logs", owner, repo, runID)
+func (c *Client) GetWorkflowRunLogs(ctx context.Context, repo, owner string, runID int64) (string, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/logs", owner, repo, runID)
 	data, err := c.doRaw(ctx, http.MethodGet, path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to download logs: %w", err)
+		return "", fmt.Errorf("failed to download logs: %w", err)
 	}
 
 	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read log archive: %w", err)
+		return "", fmt.Errorf("failed to read log archive: %w", err)
 	}
 
 	var content strings.Builder
@@ -57,8 +55,5 @@ func (c *Client) GetWorkflowRunLogs(ctx context.Context, repo, owner, runID stri
 		content.WriteString("\n")
 	}
 
-	return &models.Log{
-		RunID:   runID,
-		Content: content.String(),
-	}, nil
+	return content.String(), nil
 }
