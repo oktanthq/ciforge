@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/abdulahshoaib/ciforge/models"
 )
 
 // ListArtifacts retrieves all GitHub Actions artifacts for a repository.
@@ -18,19 +16,20 @@ import (
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
+//   - opts: Optional list configuration for pagination and filtering.
 //
 // Returns a slice of artifacts or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) ListArtifacts(ctx context.Context, repo, owner string, opts *ListArtifactsOptions) ([]models.Artifact, error) {
+func (c *Client) ListArtifacts(ctx context.Context, repo, owner string, opts *ListArtifactsOptions) ([]Artifact, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts", owner, repo)
 	path = opts.Append(path)
 
-	var resp listArtifactsResponse
+	var resp artifactListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list artifacts: %w", err)
 	}
 
-	return mapArtifacts(resp.Artifacts), nil
+	return resp.Artifacts, nil
 }
 
 // GetArtifact retrieves a GitHub Actions artifact by its ID.
@@ -43,19 +42,19 @@ func (c *Client) ListArtifacts(ctx context.Context, repo, owner string, opts *Li
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - artifactID: Identifier of the artifact to retrieve.
+//   - artifactID: Numeric identifier of the artifact to retrieve.
 //
 // Returns the requested artifact or an error if the request fails, the
 // artifact does not exist, or the API returns a non-success status.
-func (c *Client) GetArtifact(ctx context.Context, repo, owner, artifactID string) (models.Artifact, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts/%s", owner, repo, artifactID)
+func (c *Client) GetArtifact(ctx context.Context, repo, owner string, artifactID int64) (Artifact, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts/%d", owner, repo, artifactID)
 
-	var resp artifactDTO
+	var resp Artifact
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return models.Artifact{}, fmt.Errorf("failed to get artifact: %w", err)
+		return Artifact{}, fmt.Errorf("failed to get artifact: %w", err)
 	}
 
-	return mapArtifact(resp), nil
+	return resp, nil
 }
 
 // DownloadArtifact downloads a GitHub Actions artifact from its download URL.
@@ -70,7 +69,7 @@ func (c *Client) GetArtifact(ctx context.Context, repo, owner, artifactID string
 // Returns the downloaded artifact as a byte slice or an error if the request
 // fails or the download cannot be completed.
 //
-// The download URL is provided by `ListArtifacts`. GitHub artifacts are
+// The download URL is provided by ListArtifacts. GitHub artifacts are
 // downloaded as ZIP archives.
 func (c *Client) DownloadArtifact(ctx context.Context, downloadURL string) ([]byte, error) {
 	data, err := c.doRawURL(ctx, http.MethodGet, downloadURL)
@@ -80,8 +79,20 @@ func (c *Client) DownloadArtifact(ctx context.Context, downloadURL string) ([]by
 	return data, nil
 }
 
-func (c *Client) DeleteArtifact(ctx context.Context, repo, owner, artifactID string) error {
-	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts/%s", owner, repo, artifactID)
+// DeleteArtifact permanently deletes a GitHub Actions artifact.
+//
+// The caller must have write access to the repository.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - owner: Repository owner or organization.
+//   - repo: Repository name.
+//   - artifactID: Numeric identifier of the artifact to delete.
+//
+// Returns an error if the deletion fails or the API returns a non-success
+// status.
+func (c *Client) DeleteArtifact(ctx context.Context, repo, owner string, artifactID int64) error {
+	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts/%d", owner, repo, artifactID)
 
 	if err := c.do(ctx, http.MethodDelete, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to delete artifact: %w", err)
@@ -102,18 +113,19 @@ func (c *Client) DeleteArtifact(ctx context.Context, repo, owner, artifactID str
 //   - ctx: Request context for cancellation and timeouts.
 //   - owner: Repository owner or organization.
 //   - repo: Repository name.
-//   - runID: Identifier of the workflow run.
+//   - runID: Numeric identifier of the workflow run.
+//   - opts: Optional list configuration for pagination and filtering.
 //
 // Returns a slice of artifacts associated with the workflow run or an error if
 // the request fails or the API returns a non-success status.
-func (c *Client) ListWorkflowRunArtifacts(ctx context.Context, repo, owner, run_id string, opts *ListWorkflowRunArtifactsOptions) ([]models.Artifact, error) {
-	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%s/artifacts", owner, repo, run_id)
+func (c *Client) ListWorkflowRunArtifacts(ctx context.Context, repo, owner string, runID int64, opts *ListWorkflowRunArtifactsOptions) ([]Artifact, error) {
+	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/artifacts", owner, repo, runID)
 	path = opts.AppendQueryParams(path)
 
-	var resp listArtifactsResponse
+	var resp artifactListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list artifacts: %w", err)
 	}
 
-	return mapArtifacts(resp.Artifacts), nil
+	return resp.Artifacts, nil
 }
