@@ -1,8 +1,58 @@
 package github
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
-type workflowDTO struct {
+type GitHubApp struct {
+	ID                 int64          `json:"id"`
+	Slug               string         `json:"slug"`
+	NodeID             string         `json:"node_id"`
+	ClientID           string         `json:"client_id"`
+	Owner              any            `json:"owner"`
+	Name               string         `json:"name"`
+	Description        *string        `json:"description"`
+	ExternalURL        string         `json:"external_url"`
+	HTMLURL            string         `json:"html_url"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	Permissions        AppPermissions `json:"permissions"`
+	Events             []string       `json:"events"`
+	InstallationsCount *int           `json:"installations_count,omitempty"`
+}
+
+type AppPermissions map[string]string
+
+type WorkflowRunRef struct {
+	ID         int64  `json:"id"`
+	RepoID     int64  `json:"repository_id"`
+	HeadRepoID int64  `json:"head_repository_id"`
+	HeadBranch string `json:"head_branch"`
+	HeadSHA    string `json:"head_sha"`
+}
+
+type Artifact struct {
+	ID                 int64           `json:"id"`
+	NodeID             string          `json:"node_id"`
+	Name               string          `json:"name"`
+	SizeInBytes        int64           `json:"size_in_bytes"`
+	URL                string          `json:"url"`
+	ArchiveDownloadURL string          `json:"archive_download_url"`
+	Expired            bool            `json:"expired"`
+	CreatedAt          time.Time       `json:"created_at"`
+	ExpiresAt          *time.Time      `json:"expires_at"`
+	UpdatedAt          *time.Time      `json:"updated_at"`
+	Digest             string          `json:"digest"`
+	WorkflowRun        *WorkflowRunRef `json:"workflow_run"`
+}
+
+type artifactListResponse struct {
+	TotalCount int        `json:"total_count"`
+	Artifacts  []Artifact `json:"artifacts"`
+}
+
+type Workflow struct {
 	ID        int64     `json:"id"`
 	NodeID    string    `json:"node_id"`
 	Name      string    `json:"name"`
@@ -15,12 +65,12 @@ type workflowDTO struct {
 	BadgeURL  string    `json:"badge_url"`
 }
 
-type listWorkflowsResponse struct {
-	TotalCount int           `json:"total_count"`
-	Workflows  []workflowDTO `json:"workflows"`
+type workflowListResponse struct {
+	TotalCount int        `json:"total_count"`
+	Workflows  []Workflow `json:"workflows"`
 }
 
-type workflowDispatchRequest struct {
+type WorkflowDispatchRequest struct {
 	Ref    string         `json:"ref"`
 	Inputs map[string]any `json:"inputs,omitempty"`
 }
@@ -31,7 +81,13 @@ type workflowDispatchResponse struct {
 	HTMLURL       string `json:"html_url"`
 }
 
-type workflowRunDTO struct {
+type WorkflowDispatchEvent struct {
+	RunID  int64
+	RunURL string
+	URL    string
+}
+
+type WorkflowRun struct {
 	ID               int64     `json:"id"`
 	Name             string    `json:"name"`
 	NodeID           string    `json:"node_id"`
@@ -54,12 +110,12 @@ type workflowRunDTO struct {
 	RunStartedAt     time.Time `json:"run_started_at"`
 }
 
-type listWorkflowRunsResponse struct {
-	TotalCount   int              `json:"total_count"`
-	WorkflowRuns []workflowRunDTO `json:"workflow_runs"`
+type workflowRunListResponse struct {
+	TotalCount   int           `json:"total_count"`
+	WorkflowRuns []WorkflowRun `json:"workflow_runs"`
 }
 
-type stepsDTO struct {
+type Step struct {
 	Name        string `json:"name"`
 	Status      string `json:"status"`
 	Conclusion  string `json:"conclusion"`
@@ -68,7 +124,7 @@ type stepsDTO struct {
 	CompletedAt string `json:"completed_at"`
 }
 
-type jobDTO struct {
+type Job struct {
 	ID              int64      `json:"id"`
 	RunID           int64      `json:"run_id"`
 	RunURL          string     `json:"run_url"`
@@ -81,7 +137,7 @@ type jobDTO struct {
 	StartedAt       *time.Time `json:"started_at"`
 	CompletedAt     *time.Time `json:"completed_at"`
 	Name            string     `json:"name"`
-	Steps           []stepsDTO `json:"steps"`
+	Steps           []Step     `json:"steps"`
 	CheckRunURL     string     `json:"check_run_url"`
 	Labels          []string   `json:"labels"`
 	RunnerID        int64      `json:"runner_id"`
@@ -92,47 +148,19 @@ type jobDTO struct {
 	HeadBranch      string     `json:"head_branch"`
 }
 
-type listJobsResponse struct {
-	TotalCount int      `json:"total_count"`
-	Jobs       []jobDTO `json:"jobs"`
+type jobListResponse struct {
+	TotalCount int   `json:"total_count"`
+	Jobs       []Job `json:"jobs"`
 }
 
-type runDTO struct {
-	ID               int64  `json:"id"`
-	RepositoryID     int64  `json:"repository_id"`
-	HeadRepositoryID int64  `json:"head_repository_id"`
-	HeadBranch       string `json:"head_branch"`
-	HeadSHA          string `json:"head_sha"`
+type WorkflowApproval struct {
+	State        string        `json:"state"`
+	Comment      string        `json:"comment"`
+	Environments []Environment `json:"environments"`
+	User         User          `json:"user"`
 }
 
-type artifactDTO struct {
-	ID                 int64      `json:"id"`
-	NodeID             string     `json:"node_id"`
-	Name               string     `json:"name"`
-	SizeInBytes        int64      `json:"size_in_bytes"`
-	URL                string     `json:"url"`
-	ArchiveDownloadURL string     `json:"archive_download_url"`
-	Expired            bool       `json:"expired"`
-	CreatedAt          time.Time  `json:"created_at"`
-	ExpiresAt          *time.Time `json:"expires_at"`
-	UpdatedAt          *time.Time `json:"updated_at"`
-	Digest             string     `json:"digest"`
-	WorkflowRun        *runDTO    `json:"workflow_run"`
-}
-
-type listArtifactsResponse struct {
-	TotalCount int           `json:"total_count"`
-	Artifacts  []artifactDTO `json:"artifacts"`
-}
-
-type workflowApprovalDTO struct {
-	State        string           `json:"state"`
-	Comment      string           `json:"comment"`
-	Environments []environmentDTO `json:"environments"`
-	User         userDTO          `json:"user"`
-}
-
-type environmentDTO struct {
+type Environment struct {
 	ID        int64     `json:"id"`
 	NodeID    string    `json:"node_id"`
 	Name      string    `json:"name"`
@@ -142,7 +170,7 @@ type environmentDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type userDTO struct {
+type User struct {
 	Login             string `json:"login"`
 	ID                int64  `json:"id"`
 	NodeID            string `json:"node_id"`
@@ -169,7 +197,80 @@ type ConcurrencyGroup struct {
 	LastAcquiredAt *time.Time `json:"last_acquired_at"`
 }
 
-type listConcurrencyGroups struct {
+type concurrencyGroupListResponse struct {
 	TotalCount        int64              `json:"total_count"`
 	ConcurrencyGroups []ConcurrencyGroup `json:"concurrency_groups"`
+}
+
+type BillableWorkflowResponse struct {
+	Billable BillableWorkflow `json:"billable"`
+}
+
+type BillableWorkflow struct {
+	Ubuntu  *WorkflowUsage `json:"UBUNTU,omitempty"`
+	MacOS   *WorkflowUsage `json:"MACOS,omitempty"`
+	Windows *WorkflowUsage `json:"WINDOWS,omitempty"`
+}
+
+type WorkflowUsage struct {
+	TotalMS int64 `json:"total_ms"`
+}
+
+type Billable struct {
+	Ubuntu  *RunnerUsage `json:"UBUNTU,omitempty"`
+	MacOS   *RunnerUsage `json:"MACOS,omitempty"`
+	Windows *RunnerUsage `json:"WINDOWS,omitempty"`
+}
+
+type RunnerUsage struct {
+	TotalMS int64      `json:"total_ms"`
+	Jobs    int        `json:"jobs"`
+	JobRuns []JobUsage `json:"job_runs,omitempty"`
+}
+
+type JobUsage struct {
+	JobID      int64 `json:"job_id"`
+	DurationMS int64 `json:"duration_ms"`
+}
+
+type Deployment struct {
+	URL                   string          `json:"url"`
+	ID                    int64           `json:"id"`
+	NodeID                string          `json:"node_id"`
+	SHA                   string          `json:"sha"`
+	Ref                   string          `json:"ref"`
+	Task                  string          `json:"task"`
+	Payload               json.RawMessage `json:"payload"`
+	OriginalEnvironment   string          `json:"original_environment"`
+	Environment           string          `json:"environment"`
+	Description           *string         `json:"description"`
+	Creator               *User           `json:"creator"`
+	CreatedAt             time.Time       `json:"created_at"`
+	UpdatedAt             time.Time       `json:"updated_at"`
+	StatusesURL           string          `json:"statuses_url"`
+	RepositoryURL         string          `json:"repository_url"`
+	TransientEnvironment  bool            `json:"transient_environment"`
+	ProductionEnvironment bool            `json:"production_environment"`
+	PerformedViaGitHubApp *GitHubApp      `json:"performed_via_github_app"`
+}
+
+type PendingDeployment struct {
+	Environment           PendingDeploymentEnvironment `json:"environment"`
+	WaitTimer             int                          `json:"wait_timer"`
+	WaitTimerStartedAt    *time.Time                   `json:"wait_timer_started_at"`
+	CurrentUserCanApprove bool                         `json:"current_user_can_approve"`
+	Reviewers             []DeploymentReviewer         `json:"reviewers"`
+}
+
+type PendingDeploymentEnvironment struct {
+	ID      int64  `json:"id"`
+	NodeID  string `json:"node_id"`
+	Name    string `json:"name"`
+	URL     string `json:"url"`
+	HTMLURL string `json:"html_url"`
+}
+
+type DeploymentReviewer struct {
+	Type     string `json:"type"`
+	Reviewer User   `json:"reviewer"`
 }
