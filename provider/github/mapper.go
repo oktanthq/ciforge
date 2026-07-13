@@ -186,3 +186,20 @@ func mapDispatchEvent(dto workflowDispatchResponse) models.DispatchEvent {
 		URL:    dto.HTMLURL,
 	}
 }
+
+func mapConcurencyGroup(con_grp ConcurrencyGroup) models.ConcurencyGroup {
+	return models.ConcurencyGroup{
+		GroupName:      con_grp.GroupName,
+		GroupURL:       con_grp.GroupURL,
+		LastAcquiredAt: con_grp.LastAcquiredAt,
+	}
+}
+
+func mapConcurencyGroups(dtos []ConcurrencyGroup) []models.ConcurencyGroup {
+	conGrps := make([]models.ConcurencyGroup, len(dtos))
+	for i, dto := range dtos {
+		conGrps[i] = mapConcurencyGroup(dto)
+	}
+
+	return conGrps
+}
