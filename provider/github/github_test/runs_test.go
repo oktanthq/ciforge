@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/abdulahshoaib/ciforge/models"
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
@@ -38,10 +37,10 @@ func TestListRunsForRepo(t *testing.T) {
 	runs, err := client.ListRunsForRepo(context.Background(), "repo", "owner")
 	assertNoError(t, err)
 	assertEqual(t, 1, len(runs))
-	assertEqual(t, "100", runs[0].ID)
-	assertEqual(t, models.RunStatusCompleted, runs[0].Status)
-	assertEqual(t, models.RunResultSuccess, runs[0].Result)
-	assertEqual(t, models.TriggerPush, runs[0].Trigger)
+	assertEqual(t, int64(100), runs[0].ID)
+	assertEqual(t, "completed", runs[0].Status)
+	assertEqual(t, "success", runs[0].Conclusion)
+	assertEqual(t, "push", runs[0].Event)
 }
 
 func TestGetWorkflowRun(t *testing.T) {
@@ -62,11 +61,11 @@ func TestGetWorkflowRun(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	run, err := client.GetWorkflowRun(context.Background(), "repo", "owner", "100")
+	run, err := client.GetWorkflowRun(context.Background(), "repo", "owner", 100)
 	assertNoError(t, err)
-	assertEqual(t, "100", run.ID)
-	assertEqual(t, models.RunStatusRunning, run.Status)
-	assertEqual(t, models.TriggerPullRequest, run.Trigger)
+	assertEqual(t, int64(100), run.ID)
+	assertEqual(t, "in_progress", run.Status)
+	assertEqual(t, "pull_request", run.Event)
 }
 
 func TestCancelWorkflowRun(t *testing.T) {
@@ -80,7 +79,7 @@ func TestCancelWorkflowRun(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	err := client.CancelWorkflowRun(context.Background(), "repo", "owner", "100")
+	err := client.CancelWorkflowRun(context.Background(), "repo", "owner", 100)
 	assertNoError(t, err)
 }
 
@@ -95,6 +94,6 @@ func TestReRunWorkflow(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	err := client.ReRunWorkflow(context.Background(), "repo", "owner", "100")
+	err := client.ReRunWorkflow(context.Background(), "repo", "owner", 100)
 	assertNoError(t, err)
 }

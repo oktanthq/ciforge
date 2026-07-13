@@ -26,8 +26,7 @@ func TestGetWorkflowRunLogs(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	log, err := client.GetWorkflowRunLogs(context.Background(), "repo", "owner", "100")
+	logs, err := client.GetWorkflowRunLogs(context.Background(), "repo", "owner", 100)
 	assertNoError(t, err)
-	assertEqual(t, "100", log.RunID)
-	assertEqual(t, true, len(log.Content) > 0)
+	assertEqual(t, true, len(logs) > 0)
 }

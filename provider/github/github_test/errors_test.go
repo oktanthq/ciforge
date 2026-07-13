@@ -37,7 +37,7 @@ func TestNotFoundError(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	_, err := client.GetWorkflow(context.Background(), "repo", "owner", "999")
+	_, err := client.GetWorkflow(context.Background(), "repo", "owner", 999)
 	assertError(t, err)
 }
 

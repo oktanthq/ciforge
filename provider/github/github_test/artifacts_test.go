@@ -67,11 +67,10 @@ func TestGetArtifact(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	artifact, err := client.GetArtifact(context.Background(), "repo", "owner", "1")
+	artifact, err := client.GetArtifact(context.Background(), "repo", "owner", 1)
 	assertNoError(t, err)
 	assertEqual(t, int64(1), artifact.ID)
 	assertEqual(t, "build.zip", artifact.Name)
-	assertEqual(t, int64(100), artifact.RunID)
 	assertEqual(t, false, artifact.Expired)
 }
 
@@ -86,7 +85,7 @@ func TestDeleteArtifact(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	err := client.DeleteArtifact(context.Background(), "repo", "owner", "1")
+	err := client.DeleteArtifact(context.Background(), "repo", "owner", 1)
 	assertNoError(t, err)
 }
 
@@ -112,12 +111,11 @@ func TestListWorkflowRunArtifacts(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	artifacts, err := client.ListWorkflowRunArtifacts(context.Background(), "repo", "owner", "100", nil)
+	artifacts, err := client.ListWorkflowRunArtifacts(context.Background(), "repo", "owner", 100, nil)
 	assertNoError(t, err)
 	assertEqual(t, 1, len(artifacts))
 	assertEqual(t, int64(1), artifacts[0].ID)
 	assertEqual(t, "build.zip", artifacts[0].Name)
-	assertEqual(t, int64(100), artifacts[0].RunID)
 }
 
 func TestDownloadArtifact(t *testing.T) {

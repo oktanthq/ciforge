@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/abdulahshoaib/ciforge/models"
 	"github.com/abdulahshoaib/ciforge/provider/github"
 )
 
@@ -29,10 +28,10 @@ func TestListJobsForWorkflowRun(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	jobs, err := client.ListJobsForWorkflowRun(context.Background(), "repo", "owner", "100")
+	jobs, err := client.ListJobsForWorkflowRun(context.Background(), "repo", "owner", 100)
 	assertNoError(t, err)
 	assertEqual(t, 2, len(jobs))
 	assertEqual(t, "test", jobs[0].Name)
-	assertEqual(t, models.RunResultSuccess, jobs[0].Result)
-	assertEqual(t, models.RunResultFailed, jobs[1].Result)
+	assertEqual(t, "success", jobs[0].Conclusion)
+	assertEqual(t, "failure", jobs[1].Conclusion)
 }
