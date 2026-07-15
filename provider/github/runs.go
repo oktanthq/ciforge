@@ -416,7 +416,7 @@ func (c *Client) ReRunFailedJobs(ctx context.Context, repo, owner string, runID 
 func (c *Client) GetWorkflowRunUsage(ctx context.Context, repo, owner string, runID int64) (Billable, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/timing", owner, repo, runID)
 
-	var resp BillableResponse
+	var resp BillableRunResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return Billable{}, fmt.Errorf("failed to get workflow run{%d} usage: %w", runID, err)
 	}

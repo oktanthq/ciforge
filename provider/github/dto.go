@@ -202,6 +202,11 @@ type concurrencyGroupListResponse struct {
 	ConcurrencyGroups []ConcurrencyGroup `json:"concurrency_groups"`
 }
 
+type BillableRunResponse struct {
+	Billable      Billable `json:"billable"`
+	RunDurationMS int64    `json:"run_duration_ms"`
+}
+
 type BillableWorkflowResponse struct {
 	Billable BillableWorkflow `json:"billable"`
 }
