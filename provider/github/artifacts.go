@@ -22,7 +22,7 @@ import (
 // returns a non-success status.
 func (c *Client) ListArtifacts(ctx context.Context, repo, owner string, opts *ListArtifactsOptions) ([]Artifact, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/artifacts", owner, repo)
-	path = opts.Append(path)
+	path = appendQueryParams(path, opts)
 
 	var resp artifactListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -120,7 +120,7 @@ func (c *Client) DeleteArtifact(ctx context.Context, repo, owner string, artifac
 // the request fails or the API returns a non-success status.
 func (c *Client) ListWorkflowRunArtifacts(ctx context.Context, repo, owner string, runID int64, opts *ListWorkflowRunArtifactsOptions) ([]Artifact, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/artifacts", owner, repo, runID)
-	path = opts.AppendQueryParams(path)
+	path = appendQueryParams(path, opts)
 
 	var resp artifactListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
