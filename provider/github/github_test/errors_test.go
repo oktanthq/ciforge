@@ -51,6 +51,6 @@ func TestUnauthorizedError(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("bad-token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	_, err := client.ListRunsForRepo(context.Background(), "repo", "owner")
+	_, err := client.ListRunsForRepo(context.Background(), "repo", "owner", github.ListRunsForRepoOptions{})
 	assertError(t, err)
 }

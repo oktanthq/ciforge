@@ -149,7 +149,7 @@ func (c *Client) GetWorkflowUsage(ctx context.Context, repo, owner string, workf
 
 	var resp BillableWorkflowResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return BillableWorkflow{}, fmt.Errorf("failed to get usage for workflow{%s}: %w", workflowID, err)
+		return BillableWorkflow{}, fmt.Errorf("failed to get usage for workflow{%d}: %w", workflowID, err)
 	}
 	return resp.Billable, nil
 }

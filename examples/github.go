@@ -53,7 +53,7 @@ func main() {
 	}
 
 	// ── 3. List runs for a workflow ─────────────────────────────────
-	runs, err := client.ListRunsForWorkflow(ctx, repo, owner, 12345)
+	runs, err := client.ListRunsForWorkflow(ctx, repo, owner, 12345, gh.ListRunsForWorkflowOpts{})
 	if err != nil {
 		log.Fatal(err)
 	}

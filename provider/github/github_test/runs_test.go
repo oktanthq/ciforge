@@ -34,7 +34,7 @@ func TestListRunsForRepo(t *testing.T) {
 	defer srv.Close()
 
 	client := github.New("token", github.WithBaseURL(srv.URL), github.WithHTTPClient(srv.Client()))
-	runs, err := client.ListRunsForRepo(context.Background(), "repo", "owner")
+	runs, err := client.ListRunsForRepo(context.Background(), "repo", "owner", github.ListRunsForRepoOptions{})
 	assertNoError(t, err)
 	assertEqual(t, 1, len(runs))
 	assertEqual(t, int64(100), runs[0].ID)

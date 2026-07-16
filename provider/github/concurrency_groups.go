@@ -21,9 +21,9 @@ import (
 //
 // Returns a slice of concurrency groups defined for the repository or an error
 // if the request fails or the API returns a non-success status.
-func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner string) ([]ConcurrencyGroup, error) {
+func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner string, opts *ListConcurrencyGroupsForRepoOptions) ([]ConcurrencyGroup, error) {
 	path := fmt.Sprintf("repos/%s/%s/actions/concurrency_groups", owner, repo)
-	// TODO(abdulahshoaib): add query params
+	path = appendQueryParams(path, opts)
 
 	var resp concurrencyGroupListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -49,9 +49,9 @@ func (c *Client) ListConcurrencyGroupsForRepo(ctx context.Context, repo, owner s
 // Returns the requested concurrency group or an error if the request fails,
 // the concurrency group does not exist, or the API returns a non-success
 // status.
-func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, concurrencyGroupName string) (ConcurrencyGroup, error) {
+func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, concurrencyGroupName string, opts *GetConcurrencyGroupForRepoOptions) (ConcurrencyGroup, error) {
 	path := fmt.Sprintf("repos/%s/%s/actions/concurrency_groups/%s", owner, repo, concurrencyGroupName)
-	// TODO(abdulahshoaib): add query params
+	path = appendQueryParams(path, opts)
 
 	var resp ConcurrencyGroup
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -79,9 +79,9 @@ func (c *Client) GetConcurrencyGroupsForRepo(ctx context.Context, repo, owner, c
 // error if the request fails or the API returns a non-success status.
 //
 // TODO(abdulahshoaib): this endpoint doesn't return ConcurrencyGroup, match with the API
-func (c *Client) ListConcurrencyGroupsForWorflow(ctx context.Context, repo, owner string, runID int64) ([]ConcurrencyGroup, error) {
+func (c *Client) ListConcurrencyGroupsForWorflow(ctx context.Context, repo, owner string, runID int64, opts *ListConcurrencyGroupsForWorkflowOptions) ([]ConcurrencyGroup, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/runs/%d/concurrency_groups", owner, repo, runID)
-	// TODO(abdulahshoaib): add query params
+	path = appendQueryParams(path, opts)
 
 	var resp concurrencyGroupListResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
