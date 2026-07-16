@@ -23,7 +23,7 @@ func appendQueryParams(path string, opts any) string {
 	}
 
 	v := reflect.ValueOf(opts)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 	if v.Kind() != reflect.Struct {
@@ -191,4 +191,92 @@ type ListWorkflowRunArtifactsOptions struct {
 	//
 	// Default: "desc".
 	Direction SortDirection `query:"direction" query-default:"desc"`
+}
+
+type ListRunsForWorkflowOpts struct {
+	// Returns someone's workflow runs. Use the login for the user who created
+	// the push associated with the check suite or workflow run.
+	Actor string `query:"actor"`
+
+	// Returns workflow runs associated with a branch. Use the name of the branch
+	// of the push.
+	Branch string `query:"branch"`
+
+	// Returns workflow run triggered by the event you specify. For example, push,
+	// pull_request or issue.
+	Event string `query:"event"`
+
+	// Returns workflow runs with the check run status or conclusion that you specify.
+	// For example, a conclusion can be success or a status can be in_progress. Only
+	// GitHub Actions can set a status of waiting, pending, or requested.
+
+	// Can be one of: completed, action_required, cancelled, failure, neutral, skipped,
+	// stale, success, timed_out, in_progress, queued, requested, waiting, pending
+	Status string `query:"status"`
+
+	// The number of results per page (max 100)
+	// Default: 30
+	PerPage int64 `query:"per_page"`
+
+	// The page number of the results to fetch.
+	// Default: 1
+	Page int64 `query:"page"`
+
+	// Returns workflow runs created within the given date-time range.
+	Created string `query:"created"`
+
+	// If true pull requests are omitted from the response (empty array).
+	// Default: false
+	ExcludePullRequests bool `query:"exclude_pull_requests"`
+
+	// Returns workflow runs with the check_suite_id that you specify.
+	CheckSuiteID int64 `query:"check_suite_id"`
+
+	//Only returns workflow runs that are associated with the specified head_sha.
+	HeadSHA string `query:"head_sha"`
+}
+
+// ListConcurrencyGroupsForRepoOptions configures pagination when listing
+// concurrency groups for a repository.
+type ListConcurrencyGroupsForRepoOptions struct {
+	// PerPage is the number of results per page (max 100).
+	//
+	// Default: 30.
+	PerPage int `query:"per_page"`
+
+	// After is a cursor for forward-only pagination. If specified, the
+	// query only searches for results after this cursor.
+	After string `query:"after"`
+}
+
+// GetConcurrencyGroupForRepoOptions filters the queue contents of a
+// concurrency group.
+//
+// AheadOfRun and AheadOfJob are mutually exclusive.
+type GetConcurrencyGroupForRepoOptions struct {
+	// AheadOfRun filters to items ahead of this workflow run ID in
+	// the queue, plus the run itself. Mutually exclusive with
+	// AheadOfJob.
+	AheadOfRun int64 `query:"ahead_of_run"`
+
+	// AheadOfJob filters to items ahead of this job ID in the queue,
+	// plus the job itself. Mutually exclusive with AheadOfRun.
+	AheadOfJob int64 `query:"ahead_of_job"`
+}
+
+// ListConcurrencyGroupsForWorkflowOptions configures pagination when
+// listing concurrency groups for a workflow run.
+type ListConcurrencyGroupsForWorkflowOptions struct {
+	// PerPage is the number of results per page (max 100).
+	//
+	// Default: 30.
+	PerPage int `query:"per_page"`
+
+	// Before is a cursor for backward-only pagination. If specified,
+	// the query only searches for results before this cursor.
+	Before string `query:"before"`
+
+	// After is a cursor for forward-only pagination. If specified, the
+	// query only searches for results after this cursor.
+	After string `query:"after"`
 }
