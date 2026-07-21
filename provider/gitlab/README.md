@@ -63,3 +63,105 @@ PUT    /projects/:id/pipelines/:pipeline_id/metadata
 | CancelPipeline               | POST   | /projects/:id/pipelines/:pipeline_id/cancel              |
 | DeletePipeline               | DELETE | /projects/:id/pipelines/:pipeline_id                     |
 | UpdatePipelineMetadata       | PUT    | /projects/:id/pipelines/:pipeline_id/metadata            |
+
+## Trigger Tokens API
+
+```http
+GET    /projects/:id/triggers
+GET    /projects/:id/triggers/:trigger_id
+POST   /projects/:id/triggers
+PUT    /projects/:id/triggers/:trigger_id
+DELETE /projects/:id/triggers/:trigger_id
+POST   /projects/:id/trigger/pipeline
+```
+
+### Functions
+
+| Function          | Method | Endpoint                                  |
+| ----------------- | ------ | ----------------------------------------- |
+| ListTriggerTokens | GET    | /projects/:id/triggers                    |
+| GetTriggerToken   | GET    | /projects/:id/triggers/:trigger_id        |
+| CreateTriggerToken| POST   | /projects/:id/triggers                    |
+| UpdateTriggerToken| PUT    | /projects/:id/triggers/:trigger_id        |
+| DeleteTriggerToken| DELETE | /projects/:id/triggers/:trigger_id        |
+| TriggerPipeline   | POST   | /projects/:id/trigger/pipeline            |
+
+## Pipeline Schedules API
+
+```http
+GET    /projects/:id/pipeline_schedules
+GET    /projects/:id/pipeline_schedules/:pipeline_schedule_id
+GET    /projects/:id/pipeline_schedules/:pipeline_schedule_id/pipelines
+POST   /projects/:id/pipeline_schedules
+PUT    /projects/:id/pipeline_schedules/:pipeline_schedule_id
+POST   /projects/:id/pipeline_schedules/:pipeline_schedule_id/take_ownership
+DELETE /projects/:id/pipeline_schedules/:pipeline_schedule_id
+POST   /projects/:id/pipeline_schedules/:pipeline_schedule_id/play
+POST   /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables
+GET    /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key
+PUT    /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key
+DELETE /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key
+```
+
+### Functions
+
+| Function                      | Method | Endpoint                                                               |
+| ----------------------------- | ------ | ---------------------------------------------------------------------- |
+| ListPipelineSchedules         | GET    | /projects/:id/pipeline_schedules                                       |
+| GetPipelineSchedule           | GET    | /projects/:id/pipeline_schedules/:pipeline_schedule_id                 |
+| ListPipelinesBySchedule       | GET    | /projects/:id/pipeline_schedules/:pipeline_schedule_id/pipelines       |
+| CreatePipelineSchedule        | POST   | /projects/:id/pipeline_schedules                                       |
+| UpdatePipelineSchedule        | PUT    | /projects/:id/pipeline_schedules/:pipeline_schedule_id                 |
+| TakeOwnershipPipelineSchedule | POST   | /projects/:id/pipeline_schedules/:pipeline_schedule_id/take_ownership  |
+| DeletePipelineSchedule        | DELETE | /projects/:id/pipeline_schedules/:pipeline_schedule_id                 |
+| PlayPipelineSchedule          | POST   | /projects/:id/pipeline_schedules/:pipeline_schedule_id/play            |
+| CreateScheduleVariable        | POST   | /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables       |
+| GetScheduleVariable           | GET    | /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key  |
+| UpdateScheduleVariable        | PUT    | /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key  |
+| DeleteScheduleVariable        | DELETE | /projects/:id/pipeline_schedules/:pipeline_schedule_id/variables/:key  |
+
+## Job Artifacts API
+
+```http
+GET    /projects/:id/jobs/:job_id/artifacts
+GET    /projects/:id/jobs/artifacts/:ref_name/download?job=...
+GET    /projects/:id/jobs/:job_id/artifacts/*artifact_path
+GET    /projects/:id/jobs/:job_id/artifacts/tree
+GET    /projects/:id/jobs/artifacts/:ref_name/raw/*artifact_path?job=...
+POST   /projects/:id/jobs/:job_id/artifacts/keep
+DELETE /projects/:id/jobs/:job_id/artifacts
+DELETE /projects/:id/artifacts
+```
+
+### Functions
+
+| Function                       | Method   | Endpoint                                                    |
+| ------------------------------ | -------- | ----------------------------------------------------------- |
+| DownloadJobArtifacts           | GET      | /projects/:id/jobs/:job_id/artifacts                        |
+| DownloadJobArtifactsByRef      | GET      | /projects/:id/jobs/artifacts/:ref_name/download             |
+| DownloadSingleArtifactFile     | GET      | /projects/:id/jobs/:job_id/artifacts/*artifact_path         |
+| ListArtifactTree               | GET      | /projects/:id/jobs/:job_id/artifacts/tree                   |
+| DownloadSingleArtifactFileByRef| GET      | /projects/:id/jobs/artifacts/:ref_name/raw/*artifact_path   |
+| KeepJobArtifacts               | POST     | /projects/:id/jobs/:job_id/artifacts/keep                   |
+| DeleteJobArtifacts             | DELETE   | /projects/:id/jobs/:job_id/artifacts                        |
+| DeleteAllJobArtifacts          | DELETE   | /projects/:id/artifacts                                     |
+
+## Project CI/CD Variables API
+
+```http
+GET    /projects/:id/variables
+GET    /projects/:id/variables/:key
+POST   /projects/:id/variables
+PUT    /projects/:id/variables/:key
+DELETE /projects/:id/variables/:key
+```
+
+### Functions
+
+| Function                 | Method | Endpoint                           |
+| ------------------------ | ------ | ---------------------------------- |
+| ListProjectVariables     | GET    | /projects/:id/variables            |
+| GetProjectVariable       | GET    | /projects/:id/variables/:key       |
+| CreateProjectVariable    | POST   | /projects/:id/variables            |
+| UpdateProjectVariable    | PUT    | /projects/:id/variables/:key       |
+| DeleteProjectVariable    | DELETE | /projects/:id/variables/:key       |
