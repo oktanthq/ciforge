@@ -165,3 +165,53 @@ DELETE /projects/:id/variables/:key
 | CreateProjectVariable    | POST   | /projects/:id/variables            |
 | UpdateProjectVariable    | PUT    | /projects/:id/variables/:key       |
 | DeleteProjectVariable    | DELETE | /projects/:id/variables/:key       |
+
+## Runners API
+
+```http
+GET    /runners
+GET    /runners/all
+GET    /runners/:id
+PUT    /runners/:id
+GET    /runners/:id/jobs
+GET    /runners/:id/managers
+GET    /projects/:id/runners
+POST   /projects/:id/runners
+DELETE /projects/:id/runners/:runner_id
+GET    /groups/:id/runners
+POST   /runners
+DELETE /runners/:id
+DELETE /runners
+POST   /runners/verify
+POST   /runners/reset_registration_token
+POST   /projects/:id/runners/reset_registration_token
+POST   /groups/:id/runners/reset_registration_token
+POST   /runners/:id/reset_authentication_token
+POST   /runners/reset_authentication_token
+GET    /runners/router/discovery
+```
+
+### Functions
+
+| Function                           | Method | Endpoint                                          |
+| ---------------------------------- | ------ | ------------------------------------------------- |
+| ListRunners                        | GET    | /runners                                          |
+| ListAllRunners                     | GET    | /runners/all                                      |
+| GetRunner                          | GET    | /runners/:id                                      |
+| UpdateRunner                       | PUT    | /runners/:id                                      |
+| ListRunnerJobs                     | GET    | /runners/:id/jobs                                 |
+| ListRunnerManagers                 | GET    | /runners/:id/managers                             |
+| ListProjectRunners                 | GET    | /projects/:id/runners                             |
+| AssignRunnerToProject              | POST   | /projects/:id/runners                             |
+| UnassignRunnerFromProject          | DELETE | /projects/:id/runners/:runner_id                  |
+| ListGroupRunners                   | GET    | /groups/:id/runners                               |
+| CreateRunner                       | POST   | /runners                                          |
+| DeleteRunner                       | DELETE | /runners/:id                                      |
+| DeleteRunnerByToken                | DELETE | /runners                                          |
+| VerifyRunner                       | POST   | /runners/verify                                   |
+| ResetInstanceRegistrationToken     | POST   | /runners/reset_registration_token                 |
+| ResetProjectRegistrationToken      | POST   | /projects/:id/runners/reset_registration_token    |
+| ResetGroupRegistrationToken        | POST   | /groups/:id/runners/reset_registration_token      |
+| ResetRunnerAuthenticationToken     | POST   | /runners/:id/reset_authentication_token           |
+| ResetRunnerAuthenticationTokenByToken | POST | /runners/reset_authentication_token              |
+| GetJobRouterDiscovery              | GET    | /runners/router/discovery                         |

@@ -460,3 +460,148 @@ type UpdateProjectVariableRequest struct {
 	EnvironmentScope string       `json:"environment_scope,omitempty"`
 	Description      string       `json:"description,omitempty"`
 }
+
+// RunnerType specifies the type of a runner.
+type RunnerType string
+
+const (
+	RunnerTypeInstance RunnerType = "instance_type"
+	RunnerTypeGroup    RunnerType = "group_type"
+	RunnerTypeProject  RunnerType = "project_type"
+)
+
+// RunnerStatus specifies the status of a runner.
+type RunnerStatus string
+
+const (
+	RunnerStatusOnline        RunnerStatus = "online"
+	RunnerStatusOffline       RunnerStatus = "offline"
+	RunnerStatusStale         RunnerStatus = "stale"
+	RunnerStatusNeverContacted RunnerStatus = "never_contacted"
+)
+
+// Runner represents a GitLab CI/CD runner.
+type Runner struct {
+	ID                 int        `json:"id"`
+	Description        string     `json:"description"`
+	Active             bool       `json:"active"`
+	Paused             bool       `json:"paused"`
+	IsShared           bool       `json:"is_shared"`
+	RunnerType         RunnerType `json:"runner_type"`
+	Name               *string    `json:"name"`
+	Online             *bool      `json:"online"`
+	Status             RunnerStatus `json:"status"`
+	IPAddress          string     `json:"ip_address"`
+	JobExecutionStatus string     `json:"job_execution_status"`
+	TagList            []string   `json:"tag_list,omitempty"`
+	Projects           []RunnerProject `json:"projects,omitempty"`
+	AccessLevel        string     `json:"access_level,omitempty"`
+	MaximumTimeout     *int       `json:"maximum_timeout,omitempty"`
+	MaintenanceNote    *string    `json:"maintenance_note,omitempty"`
+	ContactedAt        *time.Time `json:"contacted_at,omitempty"`
+}
+
+// RunnerProject represents a project associated with a runner.
+type RunnerProject struct {
+	ID                int    `json:"id"`
+	Name              string `json:"name"`
+	NameWithNamespace string `json:"name_with_namespace"`
+	Path              string `json:"path"`
+	PathWithNamespace string `json:"path_with_namespace"`
+	CreatedAt         string `json:"created_at"`
+}
+
+// RunnerManager represents a runner manager instance.
+type RunnerManager struct {
+	ID                 int        `json:"id"`
+	SystemID           string     `json:"system_id"`
+	Version            string     `json:"version"`
+	Revision           string     `json:"revision"`
+	Platform           string     `json:"platform"`
+	Architecture       string     `json:"architecture"`
+	CreatedAt          time.Time  `json:"created_at"`
+	ContactedAt        time.Time  `json:"contacted_at"`
+	IPAddress          string     `json:"ip_address"`
+	Status             string     `json:"status"`
+	JobExecutionStatus string     `json:"job_execution_status"`
+}
+
+// RunnerTokenResponse represents the response when creating or resetting a runner token.
+type RunnerTokenResponse struct {
+	ID             int        `json:"id"`
+	Token          string     `json:"token"`
+	TokenExpiresAt *time.Time `json:"token_expires_at"`
+}
+
+// JobRouterDiscovery represents the response from the Job Router discovery endpoint.
+type JobRouterDiscovery struct {
+	ServerURL string `json:"server_url"`
+}
+
+// CreateRunnerRequest represents the request body for creating a runner.
+type CreateRunnerRequest struct {
+	Token            string            `json:"token"`
+	Description      string            `json:"description,omitempty"`
+	Info             *RunnerInfo       `json:"info,omitempty"`
+	Active           *bool             `json:"active,omitempty"`
+	Paused           *bool             `json:"paused,omitempty"`
+	Locked           *bool             `json:"locked,omitempty"`
+	RunUntagged      *bool             `json:"run_untagged,omitempty"`
+	TagList          []string          `json:"tag_list,omitempty"`
+	AccessLevel      string            `json:"access_level,omitempty"`
+	MaximumTimeout   *int              `json:"maximum_timeout,omitempty"`
+	MaintenanceNote  string            `json:"maintenance_note,omitempty"`
+}
+
+// RunnerInfo contains metadata about a runner.
+type RunnerInfo struct {
+	Name         string `json:"name,omitempty"`
+	Version      string `json:"version,omitempty"`
+	Revision     string `json:"revision,omitempty"`
+	Platform     string `json:"platform,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+}
+
+// UpdateRunnerRequest represents the request body for updating a runner.
+type UpdateRunnerRequest struct {
+	Description      *string  `json:"description,omitempty"`
+	Active           *bool    `json:"active,omitempty"`
+	Paused           *bool    `json:"paused,omitempty"`
+	TagList          []string `json:"tag_list,omitempty"`
+	RunUntagged      *bool    `json:"run_untagged,omitempty"`
+	Locked           *bool    `json:"locked,omitempty"`
+	AccessLevel      string   `json:"access_level,omitempty"`
+	MaximumTimeout   *int     `json:"maximum_timeout,omitempty"`
+	MaintenanceNote  string   `json:"maintenance_note,omitempty"`
+}
+
+// RunnerJob represents a job processed by a runner.
+type RunnerJob struct {
+	ID                 int              `json:"id"`
+	Status             string           `json:"status"`
+	Stage              string           `json:"stage"`
+	Name               string           `json:"name"`
+	Ref                string           `json:"ref"`
+	Tag                bool             `json:"tag"`
+	Coverage           *string          `json:"coverage"`
+	CreatedAt          string           `json:"created_at"`
+	StartedAt          *string          `json:"started_at"`
+	FinishedAt         *string          `json:"finished_at"`
+	Duration           *float64         `json:"duration"`
+	QueuedDuration     *float64         `json:"queued_duration"`
+	User               *JobUser         `json:"user"`
+	Commit             JobCommit        `json:"commit"`
+	Pipeline           JobPipeline      `json:"pipeline"`
+	Project            *RunnerJobProject `json:"project"`
+}
+
+// RunnerJobProject represents a project in a runner job response.
+type RunnerJobProject struct {
+	ID                int    `json:"id"`
+	Description       *string `json:"description"`
+	Name              string `json:"name"`
+	NameWithNamespace string `json:"name_with_namespace"`
+	Path              string `json:"path"`
+	PathWithNamespace string `json:"path_with_namespace"`
+	CreatedAt         string `json:"created_at"`
+}

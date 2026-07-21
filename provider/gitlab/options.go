@@ -428,3 +428,48 @@ type DeleteProjectVariableOptions struct {
 	// Possible values: [environment_scope].
 	Filter map[string]string `query:"filter"`
 }
+
+// ListRunnersOptions configures filtering when listing runners.
+type ListRunnersOptions struct {
+	// Scope filters runners by scope (deprecated).
+	// Use Type or Status instead.
+	Scope string `query:"scope"`
+
+	// Type filters runners by type.
+	// Valid values are: "instance_type", "group_type", "project_type".
+	Type RunnerType `query:"type"`
+
+	// Status filters runners by status.
+	// Valid values are: "online", "offline", "stale", "never_contacted".
+	Status RunnerStatus `query:"status"`
+
+	// Paused filters runners by paused state.
+	Paused *bool `query:"paused"`
+
+	// TagList filters runners by tags.
+	TagList string `query:"tag_list"`
+
+	// VersionPrefix filters runners by version prefix.
+	VersionPrefix string `query:"version_prefix"`
+
+	// Page is the page number of results to retrieve.
+	Page int `query:"page"`
+
+	// PerPage is the maximum number of results to return per page.
+	PerPage int `query:"per_page"`
+}
+
+// ListRunnerJobsOptions configures filtering when listing jobs for a runner.
+type ListRunnerJobsOptions struct {
+	// Status filters jobs by status.
+	Status string `query:"status"`
+
+	// OrderBy orders jobs by the given field.
+	OrderBy string `query:"order_by"`
+
+	// Sort specifies the sort direction.
+	Sort SortDirection `query:"sort"`
+
+	// SystemID filters jobs by runner manager system ID.
+	SystemID string `query:"system_id"`
+}
