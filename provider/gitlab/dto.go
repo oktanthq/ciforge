@@ -317,3 +317,146 @@ type PipelineTestReportSummarySuite struct {
 type PipelineMetadata struct {
 	Name string `json:"name"`
 }
+
+// TriggerToken represents a pipeline trigger token for a project.
+type TriggerToken struct {
+	ID          int        `json:"id"`
+	Description string     `json:"description"`
+	CreatedAt   time.Time  `json:"created_at"`
+	LastUsed    *time.Time `json:"last_used"`
+	Token       string     `json:"token"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	Owner       *JobUser   `json:"owner"`
+}
+
+// TriggerPipelineRequest represents the request body for triggering a pipeline.
+type TriggerPipelineRequest struct {
+	Ref       string            `json:"ref"`
+	Token     string            `json:"token"`
+	Variables map[string]string `json:"variables,omitempty"`
+	Inputs    map[string]any    `json:"inputs,omitempty"`
+}
+
+// PipelineScheduleInput represents an input for a pipeline schedule.
+type PipelineScheduleInput struct {
+	Name  string `json:"name"`
+	Value any    `json:"value"`
+}
+
+// PipelineScheduleLastPipeline represents the last pipeline triggered by a schedule.
+type PipelineScheduleLastPipeline struct {
+	ID        int    `json:"id"`
+	SHA       string `json:"sha"`
+	Ref       string `json:"ref"`
+	Status    string `json:"status"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
+	WebURL    string `json:"web_url,omitempty"`
+}
+
+// PipelineSchedule represents a GitLab pipeline schedule.
+type PipelineSchedule struct {
+	ID           int                            `json:"id"`
+	Description  string                         `json:"description"`
+	Ref          string                         `json:"ref"`
+	Cron         string                         `json:"cron"`
+	CronTimezone string                         `json:"cron_timezone"`
+	NextRunAt    time.Time                      `json:"next_run_at"`
+	Active       bool                           `json:"active"`
+	CreatedAt    time.Time                      `json:"created_at"`
+	UpdatedAt    time.Time                      `json:"updated_at"`
+	Owner        *JobUser                       `json:"owner"`
+	Inputs       []PipelineScheduleInput        `json:"inputs,omitempty"`
+	Variables    []PipelineScheduleVariable     `json:"variables,omitempty"`
+	LastPipeline *PipelineScheduleLastPipeline  `json:"last_pipeline"`
+}
+
+// PipelineScheduleVariable represents a variable for a pipeline schedule.
+type PipelineScheduleVariable struct {
+	Key          string `json:"key"`
+	Value        string `json:"value"`
+	VariableType string `json:"variable_type"`
+	Raw          bool   `json:"raw,omitempty"`
+}
+
+// CreatePipelineScheduleRequest represents the request body for creating a pipeline schedule.
+type CreatePipelineScheduleRequest struct {
+	Cron         string                   `json:"cron"`
+	Description  string                   `json:"description"`
+	Ref          string                   `json:"ref"`
+	Active       *bool                    `json:"active,omitempty"`
+	CronTimezone string                   `json:"cron_timezone,omitempty"`
+	Inputs       []PipelineScheduleInput  `json:"inputs,omitempty"`
+}
+
+// UpdatePipelineScheduleRequest represents the request body for updating a pipeline schedule.
+type UpdatePipelineScheduleRequest struct {
+	Cron         string                   `json:"cron,omitempty"`
+	Description  string                   `json:"description,omitempty"`
+	Ref          string                   `json:"ref,omitempty"`
+	Active       *bool                    `json:"active,omitempty"`
+	CronTimezone string                   `json:"cron_timezone,omitempty"`
+	Inputs       []PipelineScheduleInput  `json:"inputs,omitempty"`
+}
+
+// PipelineScheduleVariableRequest represents the request body for creating/updating a schedule variable.
+type PipelineScheduleVariableRequest struct {
+	Key          string `json:"key"`
+	Value        string `json:"value"`
+	VariableType string `json:"variable_type,omitempty"`
+}
+
+// ArtifactFileEntry represents a file or directory entry in an artifacts archive.
+type ArtifactFileEntry struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+	Type string `json:"type"`
+	Size *int   `json:"size,omitempty"`
+	Mode string `json:"mode"`
+}
+
+// VariableType specifies the type of a CI/CD variable.
+type VariableType string
+
+const (
+	VariableTypeEnvVar VariableType = "env_var"
+	VariableTypeFile   VariableType = "file"
+)
+
+// ProjectVariable represents a CI/CD variable for a project.
+type ProjectVariable struct {
+	Key              string       `json:"key"`
+	Value            string       `json:"value"`
+	VariableType     VariableType `json:"variable_type"`
+	Protected        bool         `json:"protected"`
+	Masked           bool         `json:"masked"`
+	Hidden           bool         `json:"hidden"`
+	Raw              bool         `json:"raw"`
+	EnvironmentScope string       `json:"environment_scope"`
+	Description      *string      `json:"description"`
+}
+
+// CreateProjectVariableRequest represents the request body for creating a project variable.
+type CreateProjectVariableRequest struct {
+	Key              string       `json:"key"`
+	Value            string       `json:"value"`
+	VariableType     VariableType `json:"variable_type,omitempty"`
+	Protected        *bool        `json:"protected,omitempty"`
+	Masked           *bool        `json:"masked,omitempty"`
+	MaskedAndHidden  *bool        `json:"masked_and_hidden,omitempty"`
+	Hidden           *bool        `json:"hidden,omitempty"`
+	Raw              *bool        `json:"raw,omitempty"`
+	EnvironmentScope string       `json:"environment_scope,omitempty"`
+	Description      string       `json:"description,omitempty"`
+}
+
+// UpdateProjectVariableRequest represents the request body for updating a project variable.
+type UpdateProjectVariableRequest struct {
+	Value            string       `json:"value,omitempty"`
+	VariableType     VariableType `json:"variable_type,omitempty"`
+	Protected        *bool        `json:"protected,omitempty"`
+	Masked           *bool        `json:"masked,omitempty"`
+	Raw              *bool        `json:"raw,omitempty"`
+	EnvironmentScope string       `json:"environment_scope,omitempty"`
+	Description      string       `json:"description,omitempty"`
+}

@@ -303,3 +303,128 @@ type GetLatestPipelineOptions struct {
 	// Defaults to the project's default branch when not specified.
 	Ref string `query:"ref"`
 }
+
+// PipelineScheduleScope filters pipeline schedules by their active state.
+type PipelineScheduleScope string
+
+const (
+	PipelineScheduleScopeActive   PipelineScheduleScope = "active"
+	PipelineScheduleScopeInactive PipelineScheduleScope = "inactive"
+)
+
+// ListPipelineSchedulesOptions configures filtering when listing pipeline schedules.
+type ListPipelineSchedulesOptions struct {
+	// Scope filters pipeline schedules by their active state.
+	//
+	// Valid values are: "active", "inactive".
+	Scope PipelineScheduleScope `query:"scope"`
+}
+
+// ListPipelinesByScheduleOptions configures filtering when listing pipelines
+// triggered by a pipeline schedule.
+type ListPipelinesByScheduleOptions struct {
+	// Scope filters pipelines by their lifecycle scope.
+	//
+	// Valid values are: "running", "pending", "finished", "branches", "tags".
+	Scope PipelineScope `query:"scope"`
+
+	// Sort specifies the sort order for pipelines.
+	//
+	// Valid values are: "asc", "desc".
+	//
+	// Default: "asc".
+	Sort SortDirection `query:"sort"`
+
+	// Status filters pipelines by their current status.
+	Status PipelineStatus `query:"status"`
+
+	// UpdatedAfter filters pipelines updated after the specified date.
+	//
+	// Expected in ISO 8601 format (2019-03-15T08:00:00Z).
+	UpdatedAfter string `query:"updated_after"`
+
+	// UpdatedBefore filters pipelines updated before the specified date.
+	//
+	// Expected in ISO 8601 format (2019-03-15T08:00:00Z).
+	UpdatedBefore string `query:"updated_before"`
+
+	// CreatedAfter filters pipelines created after the specified date.
+	//
+	// Expected in ISO 8601 format (2019-03-15T08:00:00Z).
+	CreatedAfter string `query:"created_after"`
+
+	// CreatedBefore filters pipelines created before the specified date.
+	//
+	// Expected in ISO 8601 format (2019-03-15T08:00:00Z).
+	CreatedBefore string `query:"created_before"`
+}
+
+// DownloadJobArtifactsByRefOptions configures the download of job artifacts by reference name.
+type DownloadJobArtifactsByRefOptions struct {
+	// JobToken is the CI/CD job token for multi-project pipelines.
+	// Premium and Ultimate only.
+	JobToken string `query:"job_token"`
+
+	// SearchRecentSuccessfulPipelines searches across recent successful
+	// pipelines instead of just the latest one.
+	SearchRecentSuccessfulPipelines bool `query:"search_recent_successful_pipelines"`
+}
+
+// DownloadSingleArtifactFileByRefOptions configures the download of a single
+// artifact file by reference name.
+type DownloadSingleArtifactFileByRefOptions struct {
+	// JobToken is the CI/CD job token for multi-project pipelines.
+	// Premium and Ultimate only.
+	JobToken string `query:"job_token"`
+
+	// SearchRecentSuccessfulPipelines searches across recent successful
+	// pipelines instead of just the latest one.
+	SearchRecentSuccessfulPipelines bool `query:"search_recent_successful_pipelines"`
+}
+
+// ListArtifactTreeOptions configures the listing of files in an artifacts archive.
+type ListArtifactTreeOptions struct {
+	// Path is the path to browse in the artifacts archive.
+	// Defaults to root directory.
+	Path string `query:"path"`
+
+	// Recursive returns all entries recursively when true.
+	Recursive bool `query:"recursive"`
+
+	// JobToken is the CI/CD job token for multi-project pipelines.
+	// Premium and Ultimate only.
+	JobToken string `query:"job_token"`
+}
+
+// ListProjectVariablesOptions configures filtering when listing project variables.
+type ListProjectVariablesOptions struct {
+	// Filter filters results when multiple variables share the same key.
+	// Possible values: [environment_scope].
+	Filter map[string]string `query:"filter"`
+
+	// Page is the page number of results to retrieve.
+	//
+	// Page numbering starts at 1.
+	//
+	// Default: 1.
+	Page int `query:"page"`
+
+	// PerPage is the maximum number of variables to return per page.
+	//
+	// Default: 20.
+	PerPage int `query:"per_page"`
+}
+
+// GetProjectVariableOptions configures filtering when retrieving a single project variable.
+type GetProjectVariableOptions struct {
+	// Filter filters results when multiple variables share the same key.
+	// Possible values: [environment_scope].
+	Filter map[string]string `query:"filter"`
+}
+
+// DeleteProjectVariableOptions configures filtering when deleting a project variable.
+type DeleteProjectVariableOptions struct {
+	// Filter filters results when multiple variables share the same key.
+	// Possible values: [environment_scope].
+	Filter map[string]string `query:"filter"`
+}
