@@ -441,7 +441,7 @@ func (c *Client) GetWorkflowRunUsage(ctx context.Context, repo, owner string, ru
 //
 // Returns a slice of workflow runs associated with the specified workflow or an
 // error if the request fails or the API returns a non-success status.
-func (c *Client) ListRunsForWorkflow(ctx context.Context, repo, owner string, workflowID int64, opts ListRunsForWorkflowOpts) ([]WorkflowRun, error) {
+func (c *Client) ListRunsForWorkflow(ctx context.Context, repo, owner string, workflowID int64, opts ListRunsForWorkflowOptions) ([]WorkflowRun, error) {
 	path := fmt.Sprintf("/repos/%s/%s/actions/workflows/%d/runs", owner, repo, workflowID)
 	appendQueryParams(path, opts)
 

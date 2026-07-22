@@ -70,7 +70,7 @@ type workflowListResponse struct {
 	Workflows  []Workflow `json:"workflows"`
 }
 
-type WorkflowDispatchRequest struct {
+type WorkflowDispatchBody struct {
 	Ref    string         `json:"ref"`
 	Inputs map[string]any `json:"inputs,omitempty"`
 }

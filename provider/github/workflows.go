@@ -90,7 +90,7 @@ func (c *Client) DisableWorkflow(ctx context.Context, repo, owner string, workfl
 //
 // Returns the dispatched workflow event or an error if the request fails or
 // the API returns a non-success status.
-func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner string, workflowID int64, body WorkflowDispatchRequest) (WorkflowDispatchEvent, error) {
+func (c *Client) CreateWorkflowDispatch(ctx context.Context, repo, owner string, workflowID int64, body WorkflowDispatchBody) (WorkflowDispatchEvent, error) {
 	path := fmt.Sprintf("repos/%s/%s/actions/workflows/%d/dispatches", owner, repo, workflowID)
 
 	var resp workflowDispatchResponse

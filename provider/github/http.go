@@ -1,34 +1,38 @@
 package github
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
 	"net/http"
+
+	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
 )
 
+// Sentinel errors for common API failure modes.
+//
+// Callers can use errors.Is to check for specific error conditions
+// returned by the GitHub API.
 var (
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrNotFound     = errors.New("resource not found")
-	ErrRateLimited  = errors.New("rate limited")
+	ErrUnauthorized = httpclient.ErrUnauthorized
+	ErrNotFound     = httpclient.ErrNotFound
+	ErrRateLimited  = httpclient.ErrRateLimited
 )
 
-type apiError struct {
-	Message          string `json:"message"`
-	DocumentationURL string `json:"documentation_url"`
+// HandleError converts a non-success HTTP response into a typed Go error.
+//
+// This method implements the httpclient.Doer interface, allowing the GitHub
+// client to delegate HTTP operations to the shared httpclient package.
+func (c *Client) HandleError(resp *http.Response) error {
+	return httpclient.HandleAPIError(resp)
 }
 
-// do executes an HTTP request against the CIForge API.
+// do executes an HTTP request against the GitHub API.
 //
 // If body is non-nil, it is JSON-encoded and sent as the request body with
 // the Content-Type header set to application/json.
 //
 // The request is authenticated using the client's configured credentials.
 // Responses with a status code >= 300 are converted into typed errors via
-// handleError.
+// HandleError.
 //
 // If out is non-nil, the response body is expected to contain JSON and is
 // decoded into out.
@@ -43,45 +47,7 @@ type apiError struct {
 // Returns an error if the request cannot be created, executed, the response
 // indicates an API error, or the response JSON cannot be decoded.
 func (c *Client) do(ctx context.Context, method, path string, body, out any) error {
-	url := c.baseURL + path
-
-	var reqBody io.Reader
-	if body != nil {
-		b, err := json.Marshal(body)
-		if err != nil {
-			return fmt.Errorf("failed to marshal request body: %w", err)
-		}
-		reqBody = bytes.NewReader(b)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	c.setAuthHeaders(req)
-
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= http.StatusMultipleChoices {
-		return c.handleError(resp)
-	}
-
-	if out != nil {
-		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-			return fmt.Errorf("failed to decode response: %w", err)
-		}
-	}
-
-	return nil
+	return httpclient.Do(ctx, &c.Base, c, method, c.Base.BaseURL+path, body, out)
 }
 
 // doRaw executes an HTTP request and returns the raw response body.
@@ -92,7 +58,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 //
 // The request is authenticated using the client's configured credentials.
 // Responses with a status code >= 300 are converted into typed errors via
-// handleError.
+// HandleError.
 //
 // Parameters:
 //   - ctx: Request context for cancellation and timeouts.
@@ -102,31 +68,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 // Returns the response body as a byte slice or an error if the request fails,
 // the API returns an error status, or the response body cannot be read.
 func (c *Client) doRaw(ctx context.Context, method, path string) ([]byte, error) {
-	url := c.baseURL + path
-
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	c.setAuthHeaders(req)
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, c.handleError(resp)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return data, nil
+	return httpclient.DoRaw(ctx, &c.Base, c, method, c.Base.BaseURL+path)
 }
 
 // doRawURL executes an HTTP request against the provided URL and returns the
@@ -138,7 +80,7 @@ func (c *Client) doRaw(ctx context.Context, method, path string) ([]byte, error)
 //
 // The request is authenticated using the client's configured credentials.
 // Responses with a status code >= 300 are converted into typed errors via
-// handleError.
+// HandleError.
 //
 // Parameters:
 //   - ctx: Request context for cancellation and timeouts.
@@ -148,63 +90,5 @@ func (c *Client) doRaw(ctx context.Context, method, path string) ([]byte, error)
 // Returns the response body as a byte slice or an error if the request fails,
 // the API returns a non-success status, or the response body cannot be read.
 func (c *Client) doRawURL(ctx context.Context, method, url string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	c.setAuthHeaders(req)
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, c.handleError(resp)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return data, nil
-}
-
-// handleError converts a non-success HTTP response into a typed Go error.
-//
-// The response body is expected to contain a JSON error object matching
-// apiError. If the body cannot be decoded, the HTTP status text is used as
-// the error message instead.
-//
-// Common API status codes are mapped to package-specific sentinel errors,
-// allowing callers to use errors.Is for error handling.
-//
-// Mappings:
-//   - 401 -> ErrUnauthorized
-//   - 404 -> ErrNotFound
-//   - 429 -> ErrRateLimited
-//
-// All other status codes return an error containing the HTTP status text
-// and the API's error message.
-func (c *Client) handleError(resp *http.Response) error {
-	var apiErr apiError
-	if err := json.NewDecoder(resp.Body).Decode(&apiErr); err != nil {
-		apiErr.Message = http.StatusText(resp.StatusCode)
-	}
-
-	msg := apiErr.Message
-
-	switch resp.StatusCode {
-	case http.StatusUnauthorized:
-		return fmt.Errorf("%w: %s", ErrUnauthorized, msg)
-	case http.StatusNotFound:
-		return fmt.Errorf("%w: %s", ErrNotFound, msg)
-	case http.StatusTooManyRequests:
-		return fmt.Errorf("%w: %s", ErrRateLimited, msg)
-	default:
-		return fmt.Errorf("%s: %s", http.StatusText(resp.StatusCode), msg)
-	}
+	return httpclient.DoRaw(ctx, &c.Base, c, method, url)
 }

@@ -1,78 +1,20 @@
 package github
 
-import (
-	"net/url"
-	"reflect"
-	"strconv"
-)
+import "github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
 
 // SortDirection specifies the ordering of list results supported by the GitHub API.
-type SortDirection string
+type SortDirection = httpclient.SortDirection
 
 const (
-	SortAscending  SortDirection = "asc"
-	SortDescending SortDirection = "desc"
+	SortAscending  SortDirection = httpclient.SortAscending
+	SortDescending SortDirection = httpclient.SortDescending
 )
 
 // appendQueryParams builds a query string from the struct fields of opts
 // that are tagged with "query". Only non-zero-value fields are included.
 // Use the "query-default" tag to supply a value when the field is zero-valued.
 func appendQueryParams(path string, opts any) string {
-	if opts == nil {
-		return path
-	}
-
-	v := reflect.ValueOf(opts)
-	if v.Kind() == reflect.Pointer {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return path
-	}
-
-	q := url.Values{}
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		ft := t.Field(i)
-
-		tag := ft.Tag.Get("query")
-		if tag == "" {
-			continue
-		}
-
-		defaultVal := ft.Tag.Get("query-default")
-
-		switch field.Kind() {
-		case reflect.String:
-			s := field.String()
-			if s == "" && defaultVal != "" {
-				s = defaultVal
-			}
-			if s != "" {
-				q.Set(tag, s)
-			}
-		case reflect.Int, reflect.Int64:
-			n := field.Int()
-			if n == 0 && defaultVal != "" {
-				n, _ = strconv.ParseInt(defaultVal, 10, 64)
-			}
-			if n > 0 {
-				q.Set(tag, strconv.FormatInt(n, 10))
-			}
-		case reflect.Bool:
-			if field.Bool() {
-				q.Set(tag, "true")
-			}
-		}
-	}
-
-	if len(q) == 0 {
-		return path
-	}
-
-	return path + "?" + q.Encode()
+	return httpclient.AppendQueryParams(path, opts)
 }
 
 // ListArtifactsOptions configures pagination and filtering when listing
@@ -193,46 +135,45 @@ type ListWorkflowRunArtifactsOptions struct {
 	Direction SortDirection `query:"direction" query-default:"desc"`
 }
 
-type ListRunsForWorkflowOpts struct {
-	// Returns someone's workflow runs. Use the login for the user who created
+// ListRunsForWorkflowOptions configures filtering when listing runs
+// for a specific workflow.
+type ListRunsForWorkflowOptions struct {
+	// Actor filters workflow runs by the login of the user who created
 	// the push associated with the check suite or workflow run.
 	Actor string `query:"actor"`
 
-	// Returns workflow runs associated with a branch. Use the name of the branch
-	// of the push.
+	// Branch filters workflow runs associated with a branch.
 	Branch string `query:"branch"`
 
-	// Returns workflow run triggered by the event you specify. For example, push,
-	// pull_request or issue.
+	// Event filters workflow runs triggered by the specified event.
 	Event string `query:"event"`
 
-	// Returns workflow runs with the check run status or conclusion that you specify.
-	// For example, a conclusion can be success or a status can be in_progress. Only
-	// GitHub Actions can set a status of waiting, pending, or requested.
-
-	// Can be one of: completed, action_required, cancelled, failure, neutral, skipped,
-	// stale, success, timed_out, in_progress, queued, requested, waiting, pending
+	// Status filters workflow runs by their check run status or conclusion.
 	Status string `query:"status"`
 
-	// The number of results per page (max 100)
-	// Default: 30
+	// PerPage is the number of results per page (max 100).
+	//
+	// Default: 30.
 	PerPage int64 `query:"per_page"`
 
-	// The page number of the results to fetch.
-	// Default: 1
+	// Page is the page number of the results to fetch.
+	//
+	// Default: 1.
 	Page int64 `query:"page"`
 
-	// Returns workflow runs created within the given date-time range.
+	// Created returns workflow runs created within the given date-time range.
 	Created string `query:"created"`
 
-	// If true pull requests are omitted from the response (empty array).
-	// Default: false
+	// ExcludePullRequests, when true, omits pull requests from the response.
+	//
+	// Default: false.
 	ExcludePullRequests bool `query:"exclude_pull_requests"`
 
-	// Returns workflow runs with the check_suite_id that you specify.
+	// CheckSuiteID filters workflow runs by the specified check suite identifier.
 	CheckSuiteID int64 `query:"check_suite_id"`
 
-	//Only returns workflow runs that are associated with the specified head_sha.
+	// HeadSHA filters workflow runs to only those associated with the
+	// specified commit SHA.
 	HeadSHA string `query:"head_sha"`
 }
 
