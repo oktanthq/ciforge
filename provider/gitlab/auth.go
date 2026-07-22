@@ -2,7 +2,7 @@ package gitlab
 
 import "net/http"
 
-// setAuthHeaders adds the authentication and required API headers to an
+// SetAuthHeaders adds the authentication and required API headers to an
 // outgoing HTTP request.
 //
 // It sets the Authorization header using the client's private token and
@@ -10,6 +10,6 @@ import "net/http"
 //
 // Headers added:
 //   - PRIVATE-TOKEN: <token>
-func (c *Client) setAuthHeaders(req *http.Request) {
-	req.Header.Set("PRIVATE-TOKEN", c.token)
+func (c *Client) SetAuthHeaders(req *http.Request) {
+	req.Header.Set("PRIVATE-TOKEN", c.Token)
 }

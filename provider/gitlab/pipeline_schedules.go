@@ -86,7 +86,7 @@ func (c *Client) ListPipelinesBySchedule(ctx context.Context, projectID, schedul
 //
 // Returns the newly created pipeline schedule or an error if the request fails
 // or the API returns a non-success status.
-func (c *Client) CreatePipelineSchedule(ctx context.Context, projectID int, opts *CreatePipelineScheduleRequest) (PipelineSchedule, error) {
+func (c *Client) CreatePipelineSchedule(ctx context.Context, projectID int, opts *CreatePipelineScheduleBody) (PipelineSchedule, error) {
 	path := fmt.Sprintf("/projects/%d/pipeline_schedules", projectID)
 
 	var resp PipelineSchedule
@@ -110,7 +110,7 @@ func (c *Client) CreatePipelineSchedule(ctx context.Context, projectID int, opts
 //
 // Returns the updated pipeline schedule or an error if the request fails or
 // the API returns a non-success status.
-func (c *Client) UpdatePipelineSchedule(ctx context.Context, projectID, scheduleID int, opts *UpdatePipelineScheduleRequest) (PipelineSchedule, error) {
+func (c *Client) UpdatePipelineSchedule(ctx context.Context, projectID, scheduleID int, opts *UpdatePipelineScheduleBody) (PipelineSchedule, error) {
 	path := fmt.Sprintf("/projects/%d/pipeline_schedules/%d", projectID, scheduleID)
 
 	var resp PipelineSchedule
@@ -196,7 +196,7 @@ func (c *Client) PlayPipelineSchedule(ctx context.Context, projectID, scheduleID
 //
 // Returns the newly created variable or an error if the request fails or the
 // API returns a non-success status.
-func (c *Client) CreateScheduleVariable(ctx context.Context, projectID, scheduleID int, opts *PipelineScheduleVariableRequest) (PipelineScheduleVariable, error) {
+func (c *Client) CreateScheduleVariable(ctx context.Context, projectID, scheduleID int, opts *PipelineScheduleVariableBody) (PipelineScheduleVariable, error) {
 	path := fmt.Sprintf("/projects/%d/pipeline_schedules/%d/variables", projectID, scheduleID)
 
 	var resp PipelineScheduleVariable
@@ -241,7 +241,7 @@ func (c *Client) GetScheduleVariable(ctx context.Context, projectID, scheduleID 
 //
 // Returns the updated variable or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) UpdateScheduleVariable(ctx context.Context, projectID, scheduleID int, key string, opts *PipelineScheduleVariableRequest) (PipelineScheduleVariable, error) {
+func (c *Client) UpdateScheduleVariable(ctx context.Context, projectID, scheduleID int, key string, opts *PipelineScheduleVariableBody) (PipelineScheduleVariable, error) {
 	path := fmt.Sprintf("/projects/%d/pipeline_schedules/%d/variables/%s", projectID, scheduleID, key)
 
 	var resp PipelineScheduleVariable

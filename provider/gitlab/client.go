@@ -1,6 +1,10 @@
 package gitlab
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+)
 
 // DefaultBaseURL is the default GitLab REST API endpoint used by the client.
 //
@@ -13,25 +17,21 @@ const DefaultBaseURL = "https://gitlab.example.com/api/v4"
 // for the GitLab REST API. A single Client is safe to reuse across multiple
 // requests.
 type Client struct {
-	token      string
-	httpClient *http.Client
-	baseURL    string
+	httpclient.Base
 }
 
 // Option configures a Client during construction.
 //
 // Options allow callers to customize client behavior, such as providing a
 // custom HTTP client or overriding the GitLab API base URL.
-type Option func(*Client)
+type Option = httpclient.Option
 
 // WithHTTPClient configures the Client to use the provided HTTP client.
 //
 // This can be used to customize request behavior, such as setting timeouts,
 // transport settings, proxies, or custom middleware.
 func WithHTTPClient(httpClient *http.Client) Option {
-	return func(c *Client) {
-		c.httpClient = httpClient
-	}
+	return httpclient.WithHTTPClient(httpClient)
 }
 
 // WithBaseURL configures the Client to use a custom GitLab API base URL.
@@ -39,9 +39,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 // This is primarily intended for GitLab Self-Managed or testing against
 // mock HTTP servers.
 func WithBaseURL(baseURL string) Option {
-	return func(c *Client) {
-		c.baseURL = baseURL
-	}
+	return httpclient.WithBaseURL(baseURL)
 }
 
 // New creates a new GitLab API client.
@@ -57,22 +55,16 @@ func WithBaseURL(baseURL string) Option {
 //
 // Returns a configured GitLab API client.
 func New(token string, opts ...Option) *Client {
-	c := &Client{
-		token:      token,
-		httpClient: http.DefaultClient,
-		baseURL:    DefaultBaseURL,
+	return &Client{
+		Base: httpclient.NewBase(token, DefaultBaseURL, opts...),
 	}
-	for _, opt := range opts {
-		opt(c)
-	}
-	return c
 }
 
 // BaseURL returns the GitLab API base URL used by the client.
 //
 // This is either DefaultBaseURL or the value configured with WithBaseURL.
 func (c *Client) BaseURL() string {
-	return c.baseURL
+	return c.Base.GetBaseURL()
 }
 
 // HTTPClient returns the HTTP client used to execute requests.
@@ -80,5 +72,5 @@ func (c *Client) BaseURL() string {
 // If no custom HTTP client was provided during construction, this returns
 // http.DefaultClient.
 func (c *Client) HTTPClient() *http.Client {
-	return c.httpClient
+	return c.Base.GetHTTPClient()
 }

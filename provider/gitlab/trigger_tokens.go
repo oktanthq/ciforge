@@ -138,7 +138,7 @@ func (c *Client) DeleteTriggerToken(ctx context.Context, projectID, triggerID in
 //
 // Returns the newly created pipeline or an error if the request fails or the
 // API returns a non-success status.
-func (c *Client) TriggerPipeline(ctx context.Context, projectID int, opts *TriggerPipelineRequest) (Pipeline, error) {
+func (c *Client) TriggerPipeline(ctx context.Context, projectID int, opts *TriggerPipelineBody) (Pipeline, error) {
 	path := fmt.Sprintf("/projects/%d/trigger/pipeline?ref=%s&token=%s", projectID, opts.Ref, opts.Token)
 
 	var resp Pipeline

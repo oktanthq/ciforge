@@ -80,7 +80,7 @@ func (c *Client) GetRunner(ctx context.Context, runnerID int) (Runner, error) {
 //
 // Returns the updated runner or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) UpdateRunner(ctx context.Context, runnerID int, opts *UpdateRunnerRequest) (Runner, error) {
+func (c *Client) UpdateRunner(ctx context.Context, runnerID int, opts *UpdateRunnerBody) (Runner, error) {
 	path := fmt.Sprintf("/runners/%d", runnerID)
 
 	var resp Runner
@@ -226,7 +226,7 @@ func (c *Client) ListGroupRunners(ctx context.Context, groupID int, opts *ListRu
 //
 // Returns the created runner token response or an error if the request fails
 // or the API returns a non-success status.
-func (c *Client) CreateRunner(ctx context.Context, opts *CreateRunnerRequest) (RunnerTokenResponse, error) {
+func (c *Client) CreateRunner(ctx context.Context, opts *CreateRunnerBody) (RunnerTokenResponse, error) {
 	path := "/runners"
 
 	var resp RunnerTokenResponse

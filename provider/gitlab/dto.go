@@ -170,12 +170,12 @@ type Variable struct {
 	Value string `json:"value"`
 }
 
-type PlayJobRequest struct {
+type PlayJobBody struct {
 	JobInputs              map[string]any `json:"job_inputs,omitempty"`
 	JobVariablesAttributes []Variable     `json:"job_variables_attributes,omitempty"`
 }
 
-type RetryJobRequest struct {
+type RetryJobBody struct {
 	JobInputs map[string]any `json:"job_inputs,omitempty"`
 }
 
@@ -329,8 +329,8 @@ type TriggerToken struct {
 	Owner       *JobUser   `json:"owner"`
 }
 
-// TriggerPipelineRequest represents the request body for triggering a pipeline.
-type TriggerPipelineRequest struct {
+// TriggerPipelineBody represents the request body for triggering a pipeline.
+type TriggerPipelineBody struct {
 	Ref       string            `json:"ref"`
 	Token     string            `json:"token"`
 	Variables map[string]string `json:"variables,omitempty"`
@@ -379,8 +379,8 @@ type PipelineScheduleVariable struct {
 	Raw          bool   `json:"raw,omitempty"`
 }
 
-// CreatePipelineScheduleRequest represents the request body for creating a pipeline schedule.
-type CreatePipelineScheduleRequest struct {
+// CreatePipelineScheduleBody represents the request body for creating a pipeline schedule.
+type CreatePipelineScheduleBody struct {
 	Cron         string                   `json:"cron"`
 	Description  string                   `json:"description"`
 	Ref          string                   `json:"ref"`
@@ -389,8 +389,8 @@ type CreatePipelineScheduleRequest struct {
 	Inputs       []PipelineScheduleInput  `json:"inputs,omitempty"`
 }
 
-// UpdatePipelineScheduleRequest represents the request body for updating a pipeline schedule.
-type UpdatePipelineScheduleRequest struct {
+// UpdatePipelineScheduleBody represents the request body for updating a pipeline schedule.
+type UpdatePipelineScheduleBody struct {
 	Cron         string                   `json:"cron,omitempty"`
 	Description  string                   `json:"description,omitempty"`
 	Ref          string                   `json:"ref,omitempty"`
@@ -399,8 +399,8 @@ type UpdatePipelineScheduleRequest struct {
 	Inputs       []PipelineScheduleInput  `json:"inputs,omitempty"`
 }
 
-// PipelineScheduleVariableRequest represents the request body for creating/updating a schedule variable.
-type PipelineScheduleVariableRequest struct {
+// PipelineScheduleVariableBody represents the request body for creating/updating a schedule variable.
+type PipelineScheduleVariableBody struct {
 	Key          string `json:"key"`
 	Value        string `json:"value"`
 	VariableType string `json:"variable_type,omitempty"`
@@ -436,8 +436,8 @@ type ProjectVariable struct {
 	Description      *string      `json:"description"`
 }
 
-// CreateProjectVariableRequest represents the request body for creating a project variable.
-type CreateProjectVariableRequest struct {
+// CreateProjectVariableBody represents the request body for creating a project variable.
+type CreateProjectVariableBody struct {
 	Key              string       `json:"key"`
 	Value            string       `json:"value"`
 	VariableType     VariableType `json:"variable_type,omitempty"`
@@ -450,8 +450,8 @@ type CreateProjectVariableRequest struct {
 	Description      string       `json:"description,omitempty"`
 }
 
-// UpdateProjectVariableRequest represents the request body for updating a project variable.
-type UpdateProjectVariableRequest struct {
+// UpdateProjectVariableBody represents the request body for updating a project variable.
+type UpdateProjectVariableBody struct {
 	Value            string       `json:"value,omitempty"`
 	VariableType     VariableType `json:"variable_type,omitempty"`
 	Protected        *bool        `json:"protected,omitempty"`
@@ -538,8 +538,8 @@ type JobRouterDiscovery struct {
 	ServerURL string `json:"server_url"`
 }
 
-// CreateRunnerRequest represents the request body for creating a runner.
-type CreateRunnerRequest struct {
+// CreateRunnerBody represents the request body for creating a runner.
+type CreateRunnerBody struct {
 	Token            string            `json:"token"`
 	Description      string            `json:"description,omitempty"`
 	Info             *RunnerInfo       `json:"info,omitempty"`
@@ -562,8 +562,8 @@ type RunnerInfo struct {
 	Architecture string `json:"architecture,omitempty"`
 }
 
-// UpdateRunnerRequest represents the request body for updating a runner.
-type UpdateRunnerRequest struct {
+// UpdateRunnerBody represents the request body for updating a runner.
+type UpdateRunnerBody struct {
 	Description      *string  `json:"description,omitempty"`
 	Active           *bool    `json:"active,omitempty"`
 	Paused           *bool    `json:"paused,omitempty"`

@@ -72,7 +72,7 @@ func (c *Client) GetProjectVariable(ctx context.Context, projectID int, key stri
 //
 // Returns the newly created project variable or an error if the request fails
 // or the API returns a non-success status.
-func (c *Client) CreateProjectVariable(ctx context.Context, projectID int, opts *CreateProjectVariableRequest) (ProjectVariable, error) {
+func (c *Client) CreateProjectVariable(ctx context.Context, projectID int, opts *CreateProjectVariableBody) (ProjectVariable, error) {
 	path := fmt.Sprintf("/projects/%d/variables", projectID)
 
 	var resp ProjectVariable
@@ -97,7 +97,7 @@ func (c *Client) CreateProjectVariable(ctx context.Context, projectID int, opts 
 //
 // Returns the updated project variable or an error if the request fails or
 // the API returns a non-success status.
-func (c *Client) UpdateProjectVariable(ctx context.Context, projectID int, key string, opts *UpdateProjectVariableRequest) (ProjectVariable, error) {
+func (c *Client) UpdateProjectVariable(ctx context.Context, projectID int, key string, opts *UpdateProjectVariableBody) (ProjectVariable, error) {
 	path := fmt.Sprintf("/projects/%d/variables/%s", projectID, key)
 
 	var resp ProjectVariable

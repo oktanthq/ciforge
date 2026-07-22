@@ -211,7 +211,7 @@ func (c *Client) CancelJob(ctx context.Context, projectID, jobID int, opts *Canc
 //
 // Returns the retried job or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) RetryJob(ctx context.Context, projectID, jobID int, opts *RetryJobRequest) (*Job, error) {
+func (c *Client) RetryJob(ctx context.Context, projectID, jobID int, opts *RetryJobBody) (*Job, error) {
 	path := fmt.Sprintf("/projects/%d/jobs/%d/retry", projectID, jobID)
 
 	var resp Job
@@ -256,7 +256,7 @@ func (c *Client) EraseJob(ctx context.Context, projectID, jobID int) (*Job, erro
 //
 // Returns the triggered job or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) PlayJob(ctx context.Context, projectID, jobID int, opts *PlayJobRequest) (*Job, error) {
+func (c *Client) PlayJob(ctx context.Context, projectID, jobID int, opts *PlayJobBody) (*Job, error) {
 	path := fmt.Sprintf("/projects/%d/jobs/%d/play", projectID, jobID)
 
 	var resp Job

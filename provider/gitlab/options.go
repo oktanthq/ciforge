@@ -1,98 +1,24 @@
 package gitlab
 
 import (
-	"net/url"
-	"reflect"
-	"strconv"
 	"strings"
+
+	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
 )
 
 // SortDirection specifies the ordering of list results supported by the GitLab API.
-type SortDirection string
+type SortDirection = httpclient.SortDirection
 
 const (
-	SortAscending  SortDirection = "asc"
-	SortDescending SortDirection = "desc"
-)
-
-// JobScope represents a valid GitLab job status value for filtering.
-type JobScope string
-
-const (
-	JobScopeCanceled           JobScope = "canceled"
-	JobScopeCanceling          JobScope = "canceling"
-	JobScopeCreated            JobScope = "created"
-	JobScopeFailed             JobScope = "failed"
-	JobScopeManual             JobScope = "manual"
-	JobScopePending            JobScope = "pending"
-	JobScopePreparing          JobScope = "preparing"
-	JobScopeRunning            JobScope = "running"
-	JobScopeScheduled          JobScope = "scheduled"
-	JobScopeSkipped            JobScope = "skipped"
-	JobScopeSuccess            JobScope = "success"
-	JobScopeWaitingForCallback JobScope = "waiting_for_callback"
-	JobScopeWaitingForResource JobScope = "waiting_for_resource"
+	SortAscending  SortDirection = httpclient.SortAscending
+	SortDescending SortDirection = httpclient.SortDescending
 )
 
 // appendQueryParams builds a query string from the struct fields of opts
 // that are tagged with "query". Only non-zero-value fields are included.
 // Use the "query-default" tag to supply a value when the field is zero-valued.
 func appendQueryParams(path string, opts any) string {
-	if opts == nil {
-		return path
-	}
-
-	v := reflect.ValueOf(opts)
-	if v.Kind() == reflect.Pointer {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return path
-	}
-
-	q := url.Values{}
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		ft := t.Field(i)
-
-		tag := ft.Tag.Get("query")
-		if tag == "" {
-			continue
-		}
-
-		defaultVal := ft.Tag.Get("query-default")
-
-		switch field.Kind() {
-		case reflect.String:
-			s := field.String()
-			if s == "" && defaultVal != "" {
-				s = defaultVal
-			}
-			if s != "" {
-				q.Set(tag, s)
-			}
-		case reflect.Int, reflect.Int64:
-			n := field.Int()
-			if n == 0 && defaultVal != "" {
-				n, _ = strconv.ParseInt(defaultVal, 10, 64)
-			}
-			if n > 0 {
-				q.Set(tag, strconv.FormatInt(n, 10))
-			}
-		case reflect.Bool:
-			if field.Bool() {
-				q.Set(tag, "true")
-			}
-		}
-	}
-
-	if len(q) == 0 {
-		return path
-	}
-
-	return path + "?" + q.Encode()
+	return httpclient.AppendQueryParams(path, opts)
 }
 
 // appendScopeParams appends scope query parameters to the path.
@@ -115,6 +41,25 @@ func appendScopeParams(path string, scopes []JobScope) string {
 	}
 	return b.String()
 }
+
+// JobScope represents a valid GitLab job status value for filtering.
+type JobScope string
+
+const (
+	JobScopeCanceled           JobScope = "canceled"
+	JobScopeCanceling          JobScope = "canceling"
+	JobScopeCreated            JobScope = "created"
+	JobScopeFailed             JobScope = "failed"
+	JobScopeManual             JobScope = "manual"
+	JobScopePending            JobScope = "pending"
+	JobScopePreparing          JobScope = "preparing"
+	JobScopeRunning            JobScope = "running"
+	JobScopeScheduled          JobScope = "scheduled"
+	JobScopeSkipped            JobScope = "skipped"
+	JobScopeSuccess            JobScope = "success"
+	JobScopeWaitingForCallback JobScope = "waiting_for_callback"
+	JobScopeWaitingForResource JobScope = "waiting_for_resource"
+)
 
 // ListJobsForProjectOptions configures filtering when listing jobs for a project.
 type ListJobsForProjectOptions struct {
