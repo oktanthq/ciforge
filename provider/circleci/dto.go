@@ -2,6 +2,12 @@ package circleci
 
 import "time"
 
+// Warnings represents a warning message from the CircleCI API.
+type Warnings struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+}
+
 // Pipeline represents a CircleCI pipeline.
 //
 // A pipeline is a unit of work requested of CircleCI. Each pipeline is triggered
@@ -11,23 +17,73 @@ type Pipeline struct {
 	// ID is the unique identifier of the pipeline.
 	ID string `json:"id"`
 
-	// State is the current state of the pipeline.
-	State string `json:"state"`
+	// Errors contains any errors that occurred during pipeline processing.
+	Errors []PipelineError `json:"errors"`
+
+	// The project-slug for the pipeline.
+	ProjectSlug string `json:"project_slug"`
+
+	// The date and time the pipeline was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// Number is the pipeline number (sequential within a project).
 	Number int64 `json:"number"`
 
+	// string or integer or boolean or object
+	TriggerParameters map[string]any `json:"trigger_parameters"`
+
+	// State is the current state of the pipeline.
+	State string `json:"state"`
+
 	// CreatedAt is the timestamp when the pipeline was created.
 	CreatedAt time.Time `json:"created_at"`
+
+	// A sequence of warnings that have occurred within the pipeline.
+	Warnings []Warnings `json:"warnings"`
 
 	// Trigger contains information about what triggered the pipeline.
 	Trigger PipelineTrigger `json:"trigger"`
 
 	// VCS contains information about the version control system.
 	VCS PipelineVCS `json:"vcs"`
+}
 
-	// Errors contains any errors that occurred during pipeline processing.
-	Errors []PipelineError `json:"errors"`
+// PipelineConfig contains the configuration for a pipeline, including
+// source, compiled, and setup configurations.
+type PipelineConfig struct {
+	// The source configuration for the pipeline, before any config compilation
+	// has been performed. If there is no config, then this field will be empty.
+	Source string `json:"source"`
+
+	// The compiled configuration for the pipeline, after all orb expansion has been
+	// performed. If there were errors processing the pipeline's configuration, then
+	// this field may be empty.
+	Compiled string `json:"compiled"`
+
+	// The setup configuration for the pipeline used for Setup Workflows. If there
+	// were errors processing the pipeline's configuration or if setup workflows are
+	// not enabled, then this field should not exist
+	SetupConfig string `json:"setup-config"`
+
+	// The compiled setup configuration for the pipeline, after all orb expansion has
+	// been performed. If there were errors processing the pipeline's setup workflows,
+	// then this field may be empty.
+	CompiledSetupConfig string `json:"compiled-setup-config"`
+}
+
+// triggerPipelineResponse is the response from triggering a pipeline.
+type triggerPipelineResponse struct {
+	// The unique ID of the pipeline.
+	ID string `json:"id"`
+
+	// The current state of the pipeline.
+	State string `json:"state"`
+
+	// The number of the pipeline.
+	Number int64 `json:"number"`
+
+	// The date and time the pipeline was created.
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // PipelineTrigger contains information about what triggered a pipeline.
@@ -51,6 +107,15 @@ type PipelineTriggerActor struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+// Commit contains commit message information from the VCS.
+type Commit struct {
+	//The subject of the commit message.
+	Subject *string `json:"subject"`
+
+	// The body of the commit message.
+	Body *string `json:"body"`
+}
+
 // PipelineVCS contains version control system information for a pipeline.
 type PipelineVCS struct {
 	// ProviderName is the name of the VCS provider (e.g., "github", "bitbucket").
@@ -66,10 +131,19 @@ type PipelineVCS struct {
 	Revision string `json:"revision"`
 
 	// Branch is the branch where the pipeline ran.
-	Branch string `json:"branch"`
+	Branch string `json:"branch,omitempty"`
 
 	// Tag is the tag that triggered the pipeline, if applicable.
 	Tag string `json:"tag,omitempty"`
+
+	// The code review id.
+	ReviewID string `json:"review_id,omitempty"`
+
+	// The latest commit in the pipeline.
+	Commit Commit `json:"commit"`
+
+	// The code review URL
+	ReviewURL string `json:"review_url,omitempty"`
 }
 
 // PipelineError represents an error that occurred during pipeline processing.
@@ -160,6 +234,53 @@ type JobExecutor struct {
 
 	// Image is the Docker image used by the executor.
 	Image string `json:"image,omitempty"`
+}
+
+// PipelineWorkflow represents a workflow within a pipeline, including
+// auto-rerun information and detailed status tracking.
+type PipelineWorkflow struct {
+	// The ID of the pipeline this workflow belongs to.
+	PipelineID string `json:"pipeline_id"`
+
+	// UUID of user who canceled the workflow.
+	CanceledBy string `json:"canceled_by"`
+
+	// The unique ID of the workflow.
+	ID string `json:"id"`
+
+	// Present if this workflow was auto-rerun from a previous workflow.
+	// The Nth auto-rerun workflow will have auto_rerun_number N
+	AutoRerunNumber int64 `json:"auto_rerun_number"`
+
+	// The name of the workflow.
+	Name string `json:"name"`
+
+	// The project-slug for the pipeline this workflow belongs to.
+	ProjectSlug string `json:"project_slug"`
+
+	// ErroredBy is the UUID of the user who errored the workflow.
+	ErroredBy string `json:"errored_by"`
+
+	// Tag is the tag that triggered the workflow, if applicable.
+	Tag *string `json:"tag"`
+
+	// The current status of the workflow.
+	Status string `json:"status"`
+
+	// StartedBy is the UUID of the user who started the workflow.
+	StartedBy string `json:"started_by"`
+
+	// The maximum number of auto reruns specified for the workflow.
+	MaxAutoReruns int64 `json:"max_auto_reruns"`
+
+	// The number of the pipeline this workflow belongs to.
+	PipelineNumber int64 `json:"pipeline_number"`
+
+	// The date and time the workflow was created.
+	CreatedAt time.Time `json:"created_at"`
+
+	// The date and time the workflow stopped.
+	StoppedAt *time.Time `json:"stopped_at"`
 }
 
 // JobMessage represents a message associated with a job.
@@ -255,10 +376,10 @@ type pipelineListResponse struct {
 	NextPageToken string     `json:"next_page_token"`
 }
 
-// workflowListResponse is the response from listing workflows.
-type workflowListResponse struct {
-	Items         []Workflow `json:"items"`
-	NextPageToken string     `json:"next_page_token"`
+// listPipelineWorkflowResponse is the response from listing pipeline workflows.
+type listPipelineWorkflowResponse struct {
+	Items         []PipelineWorkflow `json:"items"`
+	NextPageToken string             `json:"next_page_token"`
 }
 
 // jobListResponse is the response from listing jobs.
@@ -277,16 +398,20 @@ type testListResponse struct {
 	Items []TestResult `json:"items"`
 }
 
+// ContextBody represents the request body for creating or updating a context.
 type ContextBody struct {
 	Name  string        `json:"name"`
 	Owner *ContextOwner `json:"owner,omitempty"`
 }
 
+// ContextOwner represents the owner of a context (organization or account).
 type ContextOwner struct {
 	ID   string `json:"id"`
 	Type string `json:"type"` // "organization" or "account"
 }
 
+// Context represents a CircleCI context, which stores environment variables
+// and configuration shared across projects.
 type Context struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`

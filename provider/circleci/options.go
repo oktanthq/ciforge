@@ -21,15 +21,15 @@ func appendQueryParams(path string, opts any) string {
 type PipelineStatus string
 
 const (
-	PipelineStatusCreated   PipelineStatus = "created"
-	PipelineStatusErrored   PipelineStatus = "error"
-	PipelineStatusSetupPending  PipelineStatus = "setup-pending"
-	PipelineStatusSetup     PipelineStatus = "setup"
-	PipelineStatusPending   PipelineStatus = "pending"
-	PipelineStatusRunning   PipelineStatus = "running"
-	PipelineStatusSuccess   PipelineStatus = "success"
-	PipelineStatusFailed    PipelineStatus = "failed"
-	PipelineStatusCanceled  PipelineStatus = "canceled"
+	PipelineStatusCreated      PipelineStatus = "created"
+	PipelineStatusErrored      PipelineStatus = "error"
+	PipelineStatusSetupPending PipelineStatus = "setup-pending"
+	PipelineStatusSetup        PipelineStatus = "setup"
+	PipelineStatusPending      PipelineStatus = "pending"
+	PipelineStatusRunning      PipelineStatus = "running"
+	PipelineStatusSuccess      PipelineStatus = "success"
+	PipelineStatusFailed       PipelineStatus = "failed"
+	PipelineStatusCanceled     PipelineStatus = "canceled"
 	PipelineStatusUnauthorized PipelineStatus = "unauthorized"
 )
 
@@ -37,34 +37,47 @@ const (
 type WorkflowStatus string
 
 const (
-	WorkflowStatusQueued   WorkflowStatus = "queued"
-	WorkflowStatusSetup    WorkflowStatus = "setup"
-	WorkflowStatusPending  WorkflowStatus = "pending"
-	WorkflowStatusRunning  WorkflowStatus = "running"
-	WorkflowStatusSuccess  WorkflowStatus = "success"
-	WorkflowStatusFailed   WorkflowStatus = "failed"
-	WorkflowStatusCanceled WorkflowStatus = "canceled"
+	WorkflowStatusQueued       WorkflowStatus = "queued"
+	WorkflowStatusSetup        WorkflowStatus = "setup"
+	WorkflowStatusPending      WorkflowStatus = "pending"
+	WorkflowStatusRunning      WorkflowStatus = "running"
+	WorkflowStatusSuccess      WorkflowStatus = "success"
+	WorkflowStatusFailed       WorkflowStatus = "failed"
+	WorkflowStatusCanceled     WorkflowStatus = "canceled"
 	WorkflowStatusUnauthorzied WorkflowStatus = "unauthorized"
 )
 
 // ListPipelinesOptions configures filtering and pagination when listing
-// pipelines for a project.
+// pipelines for an organization.
 //
 // Zero-value fields are omitted from the request, allowing CircleCI's default
 // behavior to be used.
 type ListPipelinesOptions struct {
+	// OrgSlug is the organization slug (e.g., "gh/CircleCI-Public").
+	// Required for the organization-level pipeline listing endpoint.
+	OrgSlug string `query:"org-slug"`
+
 	// PageToken is a token for pagination. Use the next_page_token from
 	// a previous response to get the next page.
 	PageToken string `query:"page-token"`
 
-	// Branch filters pipelines by branch name.
-	Branch string `query:"branch"`
+	// Only include entries created by your user.
+	Mine bool `query:"mine"`
+}
+
+// GetYourPipelineOptions configures pagination when listing your own pipelines.
+type GetYourPipelineOptions struct {
+	// PageToken is a token for pagination
+	PageToken string `query:"page-token"`
 }
 
 // GetPipelineOptions configures filtering when retrieving a pipeline by number.
 type GetPipelineOptions struct {
 	// Branch filters pipelines by branch name.
 	Branch string `query:"branch"`
+
+	// PageToken is a token for pagination
+	PageToken string `query:"page-token"`
 }
 
 // ListPipelineWorkflowsOptions configures pagination when listing workflows
@@ -79,6 +92,19 @@ type ListPipelineWorkflowsOptions struct {
 type ListWorkflowJobsOptions struct {
 	// PageToken is a token for pagination.
 	PageToken string `query:"page-token"`
+}
+
+// ContinuePipelineBody represents the request body for continuing a pipeline.
+type ContinuePipelineBody struct {
+	// A pipeline continuation key.
+	ContinuationKey string `json:"continuation-key"`
+
+	// A configuration string for the pipeline.
+	Configuration string `json:"configuration"`
+
+	// An object containing pipeline parameters and their values. Pipeline parameters
+	// have the following size limits: 100 max entries, 128 maximum key length, 512 maximum value length.
+	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
 // ListProjectPipelinesOptions configures filtering and pagination when listing
