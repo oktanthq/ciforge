@@ -43,11 +43,22 @@ type WorkflowMetricsData struct {
 
 // MetricData represents a metric with min, max, mean, median, and percentile values.
 type MetricData struct {
+	// Min is the minimum metric value.
 	Min float64 `json:"min"`
+
+	// Max is the maximum metric value.
 	Max float64 `json:"max"`
+
+	// Mean is the average metric value.
 	Mean float64 `json:"mean"`
+
+	// Median is the median metric value.
 	Median float64 `json:"median"`
+
+	// P95 is the 95th percentile metric value.
 	P95 float64 `json:"p95"`
+
+	// StandardDeviation is the standard deviation of the metric values.
 	StandardDeviation float64 `json:"standard_deviation"`
 }
 
