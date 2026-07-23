@@ -187,6 +187,20 @@ func (c *Client) GetYourPipelines(ctx context.Context, projectSlug string, opts 
 	return resp.Items, nil
 }
 
+// GetPipelineByNumber retrieves a pipeline by its number within a project.
+//
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
+//
+// The caller must have read access to the project.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - projectSlug: The project slug (e.g., "gh/CircleCI-Public/circleci-cli").
+//   - pipelineNumber: The pipeline number.
+//
+// Returns the requested pipeline or an error if the request fails, the pipeline
+// does not exist, or the API returns a non-success status.
 func (c *Client) GetPipelineByNumber(ctx context.Context, projectSlug string, pipelineNumber int) (Pipeline, error) {
 	path := fmt.Sprintf("/project/%s/pipeline/%d", projectSlug, pipelineNumber)
 
@@ -197,6 +211,21 @@ func (c *Client) GetPipelineByNumber(ctx context.Context, projectSlug string, pi
 	return resp, nil
 }
 
+// TriggerPipelineProject triggers a new pipeline for a project using the project-based endpoint.
+//
+// Unlike TriggerPipeline which takes a full project slug, this method takes the provider,
+// organization, and project as separate parameters.
+//
+// The caller must have write access to the project.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - provider: The VCS provider ("github"/"gh", "bitbucket"/"bb", or "circleci").
+//   - org: The organization name or ID.
+//   - project: The project name or ID.
+//   - body: The trigger configuration including definition ID, config, checkout, and parameters.
+//
+// Returns an error if the request fails or the API returns a non-success status.
 func (c *Client) TriggerPipelineProject(ctx context.Context, provider, org, project string, body TriggerProjPipelineBody) error {
 	path := fmt.Sprintf("/project/%s/%s/%s/pipeline/run", provider, org, project)
 
@@ -206,6 +235,15 @@ func (c *Client) TriggerPipelineProject(ctx context.Context, provider, org, proj
 	return nil
 }
 
+// GetPipelineValues retrieves the values/parameters for a pipeline.
+//
+// The caller must have read access to the project.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - pipelineID: The unique pipeline ID.
+//
+// Returns an error if the request fails or the API returns a non-success status.
 func (c *Client) GetPipelineValues(ctx context.Context, pipelineID string) error {
 	path := fmt.Sprintf("/pipeline/%s/values", pipelineID)
 

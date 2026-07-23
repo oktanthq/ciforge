@@ -491,3 +491,41 @@ type listComponentsResponse struct {
 	// The pagination token to use when fetching the next page in this result set.
 	NextPageToken *string `json:"next_page_token"`
 }
+
+// ComponentVersion represents a specific version of a deployment component.
+type ComponentVersion struct {
+	// The version name
+	Name string `json:"name"`
+
+	// The ID of the environment in which the version has been deployed
+	EnvironmentID string `json:"environment_id"`
+
+	// The namespace in which the version was deployed
+	Namespace string `json:"namespace"`
+
+	// Whether the version is live or not
+	IsLive bool `json:"is_live"`
+
+	// The ID of the pipeline that deployed the version
+	PipelineID string `json:"pipeline_id"`
+
+	// The ID of the CircleCI workflow that deployed the version
+	WorkflowID string `json:"workflow_id"`
+
+	// The ID of the CircleCI job that deployed the version
+	JobID string `json:"job_id"`
+
+	// The number of the CircleCI job that deployed the version
+	JobNumber string `json:"job_number"`
+
+	// The time at which the version was last deployed
+	LastDeployedAt time.Time `json:"last_deployed_at"`
+}
+
+// listComponentVersionsResponse is the response from listing component versions.
+type listComponentVersionsResponse struct {
+	Items []ComponentVersion `json:"items"`
+
+	// The pagination token to use when fetching the next page in this result set.
+	NextPageToken string `json:"next_page_token"`
+}

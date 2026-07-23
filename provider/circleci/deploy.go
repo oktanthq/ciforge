@@ -85,3 +85,23 @@ func (c *Client) GetComponents(ctx context.Context, componentID string) (Compone
 	}
 	return resp, nil
 }
+
+// ListComponentVersions retrieves all versions of a deployment component.
+//
+// The caller must have read access to the project.
+//
+// Parameters:
+//   - ctx: Request context for cancellation and timeouts.
+//   - componentID: The unique component ID.
+//
+// Returns a slice of component versions or an error if the request fails or the API
+// returns a non-success status.
+func (c *Client) ListComponentVersions(ctx context.Context, componentID string) ([]ComponentVersion, error) {
+	path := fmt.Sprintf("/deploy/components/%s/versions", componentID)
+
+	var resp listComponentVersionsResponse
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return []ComponentVersion{}, fmt.Errorf("failed to get component versions: %w", err)
+	}
+	return resp.Items, nil
+}

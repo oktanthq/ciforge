@@ -108,6 +108,7 @@ type ContinuePipelineBody struct {
 	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
+// Config specifies the branch or tag to use when fetching the pipeline configuration.
 type Config struct {
 	// The branch that should be used to fetch the config file. Note that branch and tag are mutually exclusive.
 	// To trigger a pipeline for a PR by number use pull//head for the PR ref or pull//merge for the merge ref (GitHub only)
@@ -118,6 +119,7 @@ type Config struct {
 	Tag string `json:"tag"`
 }
 
+// Checkout specifies the branch or tag to use when checking out code.
 type Checkout struct {
 	// The branch that should be used to check out code on a checkout step. Note that branch and tag are mutually exclusive.
 	// To trigger a pipeline for a PR by number use pull//head for the PR ref or pull//merge for the merge ref (GitHub only)
@@ -128,6 +130,7 @@ type Checkout struct {
 	Tag string `json:"tag"`
 }
 
+// TriggerProjPipelineBody represents the request body for triggering a project pipeline.
 type TriggerProjPipelineBody struct {
 	// The unique id for the pipeline definition. This can be found in the page Project Settings > Pipelines.
 	DefinitionID string `json:"definition_id"`
