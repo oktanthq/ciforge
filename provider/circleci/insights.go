@@ -85,7 +85,8 @@ type workflowRunsListResponse struct {
 
 // ListWorkflowMetrics retrieves summary metrics for a project's workflows.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -109,7 +110,8 @@ func (c *Client) ListWorkflowMetrics(ctx context.Context, projectSlug string, op
 
 // ListWorkflowRuns retrieves recent runs of a workflow.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -134,7 +136,8 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, projectSlug, workflowName
 
 // ListJobMetrics retrieves summary metrics for jobs in a workflow.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //

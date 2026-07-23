@@ -53,8 +53,9 @@ const (
 // Zero-value fields are omitted from the request, allowing CircleCI's default
 // behavior to be used.
 type ListPipelinesOptions struct {
-	// OrgSlug is the organization slug (e.g., "gh/CircleCI-Public").
-	// Required for the organization-level pipeline listing endpoint.
+	// OrgSlug is the organization slug: "{provider}/{organization}"
+	// (e.g., "gh/CircleCI-Public"). Required for the organization-level
+	// pipeline listing endpoint.
 	OrgSlug string `query:"org-slug"`
 
 	// PageToken is a token for pagination. Use the next_page_token from
@@ -107,6 +108,37 @@ type ContinuePipelineBody struct {
 	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
+type Config struct {
+	// The branch that should be used to fetch the config file. Note that branch and tag are mutually exclusive.
+	// To trigger a pipeline for a PR by number use pull//head for the PR ref or pull//merge for the merge ref (GitHub only)
+	Branch string `json:"branch"`
+
+	// The tag that should be used to fetch the config file. The commit that this tag points to is used for the pipeline.
+	// Note that branch and tag are mutually exclusive.
+	Tag string `json:"tag"`
+}
+
+type Checkout struct {
+	// The branch that should be used to check out code on a checkout step. Note that branch and tag are mutually exclusive.
+	// To trigger a pipeline for a PR by number use pull//head for the PR ref or pull//merge for the merge ref (GitHub only)
+	Branch string `json:"branch"`
+
+	// The tag that should be used to check out code on a checkout step. The commit that this tag points to is used for the pipeline.
+	// Note that branch and tag are mutually exclusive.
+	Tag string `json:"tag"`
+}
+
+type TriggerProjPipelineBody struct {
+	// The unique id for the pipeline definition. This can be found in the page Project Settings > Pipelines.
+	DefinitionID string `json:"definition_id"`
+
+	Config Config `json:"config"`
+
+	Checkout Checkout `json:"checkout"`
+
+	Parameters map[string]any `json:"parameters"`
+}
+
 // ListProjectPipelinesOptions configures filtering and pagination when listing
 // pipelines for a project.
 type ListProjectPipelinesOptions struct {
@@ -118,6 +150,11 @@ type ListProjectPipelinesOptions struct {
 }
 
 // TriggerPipelineBody represents the request body for triggering a pipeline.
+//
+// The project slug format is "{provider}/{organization}/{project}" where:
+//   - provider: "github"/"gh", "bitbucket"/"bb", or "circleci"
+//   - organization: The org name or ID (e.g., "CircleCI-Public")
+//   - project: The project name or ID (e.g., "api-preview-docs")
 type TriggerPipelineBody struct {
 	// Branch is the branch to run the pipeline on.
 	// Optional if a tag is provided.

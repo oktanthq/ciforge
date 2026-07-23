@@ -8,7 +8,8 @@ import (
 
 // ListPipelines retrieves all pipelines for an organization. (max 250)
 //
-// The org slug must be in the form of "vcs/org" (e.g., "gh/CircleCI-Public").
+// The org slug is the first two segments of the project slug: "{provider}/{organization}"
+// (e.g., "gh/CircleCI-Public").
 //
 // The caller must have read access to the organization.
 //
@@ -115,7 +116,8 @@ func (c *Client) ListPipelineWorkflows(ctx context.Context, pipelineID string) (
 
 // TriggerPipeline triggers a new pipeline for a project.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have write access to the project.
 //
@@ -137,7 +139,8 @@ func (c *Client) TriggerPipeline(ctx context.Context, projectSlug string, body T
 
 // GetAllPipelines retrieves all pipelines for a project.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -161,7 +164,8 @@ func (c *Client) GetAllPipelines(ctx context.Context, projectSlug string, opts G
 
 // GetYourPipelines retrieves pipelines triggered by the authenticated user.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -181,4 +185,33 @@ func (c *Client) GetYourPipelines(ctx context.Context, projectSlug string, opts 
 		return []Pipeline{}, fmt.Errorf("failed to get pipelines for %s: %w", projectSlug, err)
 	}
 	return resp.Items, nil
+}
+
+func (c *Client) GetPipelineByNumber(ctx context.Context, projectSlug string, pipelineNumber int) (Pipeline, error) {
+	path := fmt.Sprintf("/project/%s/pipeline/%d", projectSlug, pipelineNumber)
+
+	var resp Pipeline
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return Pipeline{}, fmt.Errorf("failed to get Pipeline{%d}: %w", pipelineNumber, err)
+	}
+	return resp, nil
+}
+
+func (c *Client) TriggerPipelineProject(ctx context.Context, provider, org, project string, body TriggerProjPipelineBody) error {
+	path := fmt.Sprintf("/project/%s/%s/%s/pipeline/run", provider, org, project)
+
+	if err := c.do(ctx, http.MethodPost, path, body, nil); err != nil {
+		return fmt.Errorf("failed to trigger project pipeline: %w", err)
+	}
+	return nil
+}
+
+func (c *Client) GetPipelineValues(ctx context.Context, pipelineID string) error {
+	path := fmt.Sprintf("/pipeline/%s/values", pipelineID)
+
+	var resp map[string]any
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return fmt.Errorf("failed to get pipeline{%s} values: %w", pipelineID, err)
+	}
+	return nil
 }

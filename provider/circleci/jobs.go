@@ -7,7 +7,8 @@ import (
 
 // GetJob retrieves a job by its number within a project.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -30,7 +31,8 @@ func (c *Client) GetJob(ctx context.Context, projectSlug string, jobNumber int64
 
 // CancelJob cancels a running job.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have write access to the project.
 //
@@ -51,7 +53,8 @@ func (c *Client) CancelJob(ctx context.Context, projectSlug string, jobNumber in
 
 // GetJobArtifacts retrieves the artifacts for a job.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
@@ -76,7 +79,8 @@ func (c *Client) GetJobArtifacts(ctx context.Context, projectSlug string, jobNum
 
 // GetJobTests retrieves the test metadata for a job.
 //
-// The project slug must be in the form of "vcs/org/repo" (e.g., "gh/CircleCI-Public/circleci-cli").
+// The project slug is the three-segment slash-separated identifier: "{provider}/{organization}/{project}"
+// (e.g., "gh/CircleCI-Public/circleci-cli").
 //
 // The caller must have read access to the project.
 //
