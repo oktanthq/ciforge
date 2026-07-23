@@ -355,6 +355,24 @@ type ProjectVCSInfo struct {
 	DefaultBranch string `json:"default_branch"`
 }
 
+// Set of organizations of which a user is a member or a collaborator.
+type Collaborations struct {
+	// The UUID of the organization
+	ID string `json:"id"`
+
+	// The VCS provider
+	VCSType string `json:"vcs-type"`
+
+	// The name of the organization
+	Name string `json:"name"`
+
+	// URL to the user's avatar on the VCS
+	AvatarURL string `json:"avatar_url"`
+
+	// The slug of the organization
+	Slug string `json:"slug"`
+}
+
 // User represents a CircleCI user.
 type User struct {
 	// ID is the unique identifier of the user.
