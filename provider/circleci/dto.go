@@ -417,3 +417,77 @@ type Context struct {
 	Name      string `json:"name"`
 	CreatedAt string `json:"created_at"`
 }
+
+// listEnvironmentResponse is the response from listing environments.
+type listEnvironmentResponse struct {
+	Items []Environment `json:"items"`
+
+	// The pagination token to use when fetching the next page in this result set.
+	NextPageToken *string `json:"next_page_token"`
+}
+
+// Label represents a key-value label attached to a resource.
+type Label struct {
+	// The key of the label
+	Key string `json:"key"`
+
+	// The value of the label
+	Value string `json:"value"`
+}
+
+// Environment represents a CircleCI deployment environment.
+//
+// Environments are used to manage deployment targets and their configurations.
+type Environment struct {
+	// The time when the environment was created.
+	CreatedAt time.Time `json:"created_at"`
+
+	// Short description given to the environment
+	Description string `json:"description"`
+
+	// The environment ID
+	ID string `json:"id"`
+
+	// The labels associated to the environment
+	Labels Label `json:"labels"`
+
+	// The environment name
+	Name string `json:"name"`
+
+	// The time when the environment was updated.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Component represents a CircleCI deployment component.
+//
+// Components are deployable units within a project that can be released independently.
+type Component struct {
+	// The component ID
+	ID string `json:"id"`
+
+	// The component name
+	Name string `json:"name"`
+
+	// The project ID of the component
+	ProjectID string `json:"project_id"`
+
+	// The labels associated with the component
+	Labels []Label `json:"labels"`
+
+	// The number of releases for this Component
+	ReleaseCount int `json:"release_count"`
+
+	// The time when the component was created
+	CreatedAt time.Time `json:"created_at"`
+
+	// The time when the component was updated
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// listComponentsResponse is the response from listing components.
+type listComponentsResponse struct {
+	Items []Component `json:"items"`
+
+	// The pagination token to use when fetching the next page in this result set.
+	NextPageToken *string `json:"next_page_token"`
+}

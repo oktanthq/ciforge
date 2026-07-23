@@ -212,3 +212,32 @@ type ListJobMetricsOptions struct {
 	// Valid values: "7d", "30d", "90d".
 	DateRange string `query:"date-range"`
 }
+
+// ListEnvironmentsOptions configures filtering and pagination when listing
+// deployment environments.
+type ListEnvironmentsOptions struct {
+	// An opaque identifier of an organization used in query parameters.
+	OrgID string `query:"org-id"`
+
+	// The number of results per page.
+	PageSize int `query:"page-size"`
+
+	// A token to specify which page of results to fetch.
+	PageToken string `query:"page-token"`
+}
+
+// ListComponentsOptions configures filtering and pagination when listing
+// deployment components.
+type ListComponentsOptions struct {
+	// An opaque identifier of an organization used in query parameters.
+	OrgID string `query:"org-id"`
+
+	// An opaque identifier of an project used in query parameters.
+	ProjectID string `query:"project-id"`
+
+	// The number of results per page.
+	PageSize int `query:"page-size"`
+
+	// A token to specify which page of results to fetch.
+	PageToken string `query:"page-token"`
+}
