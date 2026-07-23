@@ -34,12 +34,12 @@ func (c *Client) GetMyInfo(ctx context.Context) (User, error) {
 //
 // Returns a slice of collaborations or an error if the request fails or the API
 // returns a non-success status.
-func (c *Client) GetCollaborations(ctx context.Context) ([]Collaborations, error) {
+func (c *Client) GetCollaborations(ctx context.Context) ([]Collaboration, error) {
 	path := "/me"
 
-	var resp []Collaborations
+	var resp []Collaboration
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
-		return []Collaborations{}, fmt.Errorf("failed to get collaborations: %w", err)
+		return []Collaboration{}, fmt.Errorf("failed to get collaborations: %w", err)
 	}
 	return resp, nil
 }
