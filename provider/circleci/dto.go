@@ -356,7 +356,7 @@ type ProjectVCSInfo struct {
 }
 
 // Set of organizations of which a user is a member or a collaborator.
-type Collaborations struct {
+type Collaboration struct {
 	// The UUID of the organization
 	ID string `json:"id"`
 
@@ -418,22 +418,34 @@ type testListResponse struct {
 
 // ContextBody represents the request body for creating or updating a context.
 type ContextBody struct {
+	// The user defined name of the context.
 	Name  string        `json:"name"`
 	Owner *ContextOwner `json:"owner,omitempty"`
 }
 
 // ContextOwner represents the owner of a context (organization or account).
 type ContextOwner struct {
-	ID   string `json:"id"`
-	Type string `json:"type"` // "organization" or "account"
+	// The unique ID of the owner of the context. This is the organization ID.
+	// Specify either owner/organization ID or the owner/organization slug.
+	// Find the organization ID and slug in the CircleCI web app (Organization Settings > Overview).
+	// Owner/organization slug is not supported for CircleCI server.
+	ID string `json:"id"`
+
+	// The type of the owner. Defaults to "organization". Use "account" if you are using CircleCI server.
+	Type string `json:"type"`
 }
 
 // Context represents a CircleCI context, which stores environment variables
 // and configuration shared across projects.
 type Context struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+	// The unique ID of the context.
+	ID string `json:"id"`
+
+	// The user-defined name of the context.
+	Name string `json:"name"`
+
+	// The date and time the context was created.
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // listEnvironmentResponse is the response from listing environments.
@@ -545,5 +557,68 @@ type listComponentVersionsResponse struct {
 	Items []ComponentVersion `json:"items"`
 
 	// The pagination token to use when fetching the next page in this result set.
+	NextPageToken string `json:"next_page_token"`
+}
+
+// listContextResponse is the response from listing contexts.
+type listContextResponse struct {
+	Items []Context `json:"items"`
+
+	// A token to pass as a page-token query parameter to return the next page of results.
+	NextPageToken *string `json:"next_page_token"`
+}
+
+// EnvVar represents an environment variable stored in a context.
+type EnvVar struct {
+	// The name of the environment variable
+	Variable string `json:"variable"`
+
+	// The date and time the environment variable was created.
+	CreatedAt time.Time `json:"created_at"`
+
+	// The date and time the environment variable was updated
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// ID of the context (UUID)
+	ContextID string `json:"context_id"`
+}
+
+// listEnvVarsResponse is the response from listing environment variables.
+type listEnvVarsResponse struct {
+	Items []EnvVar `json:"items"`
+
+	// A token to pass as a page-token query parameter to return the next page of results.
+	NextPageToken string `json:"next_page_token"`
+}
+
+// Restriction represents a context restriction that controls which projects,
+// groups, or expressions can access a context.
+type Restriction struct {
+	// UUID of the context
+	ContextID string `json:"context_id"`
+
+	// UUID of the restriction
+	ID string `json:"id"`
+
+	// Deprecated: Use RestrictionValue instead.
+	// For "project" restrictions, RestrictionValue contains the project ID.
+	ProjectID string `json:"project_id"`
+
+	// Contains a human-readable reference for the restriction. For "project" restrictions this is the name of the project.
+	Name *string `json:"name"`
+
+	// Enum: "project" "expression" "group"
+	// Type of the restriction
+	RestrictionType string `json:"restriction_type"`
+
+	// Value used to evaluate the restriction
+	RestrictionValue string `json:"restriction_value"`
+}
+
+// listContextRestrictionResponse is the response from listing context restrictions.
+type listContextRestrictionResponse struct {
+	Items []Restriction `json:"items"`
+
+	// Token that can be used to retrieve next page of results
 	NextPageToken string `json:"next_page_token"`
 }

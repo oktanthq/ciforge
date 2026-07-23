@@ -244,3 +244,47 @@ type ListComponentsOptions struct {
 	// A token to specify which page of results to fetch.
 	PageToken string `query:"page-token"`
 }
+
+// ListContextOptions configures filtering and pagination when listing contexts.
+type ListContextOptions struct {
+	// The unique ID of the owner of the context. This is the organization ID.
+	// Specify either owner/organization ID or the owner/organization slug.
+	// Find the organization ID and slug in the CircleCI web app (Organization Settings > Overview).
+	// Owner/organization slug is not supported for CircleCI server.
+	OwnerID string `json:"owner-id"`
+
+	// A string that represents an organization. This is the organization slug.
+	// Specify either this or organization/owner ID. Find the organization ID and slug in the CircleCI web app (Organization Settings > Overview).
+	// Owner/organization slug is not supported for CircleCI server.
+	OwnerSlug string `json:"owner-slug"`
+
+	// The type of the owner. Defaults to "organization". Use "account" if you are using CircleCI server.
+	OwnerType string `json:"owner-type"`
+
+	// A token to specify which page of results to fetch.
+	PageToken string `json:"page-token"`
+}
+
+// ListEnvVarOptions configures pagination when listing environment variables.
+type ListEnvVarOptions struct {
+	// A token to specify which page of results to fetch.
+	PageToken string `json:"page-token"`
+}
+
+// UpsertEnvVarBody represents the request body for creating or updating an environment variable.
+type UpsertEnvVarBody struct {
+	// The value of the environment variable
+	Value string `json:"value"`
+}
+
+// CreateContextRestrictionsBody represents the request body for creating a context restriction.
+type CreateContextRestrictionsBody struct {
+	// Enum: "project" "expression" "group"
+	// Type of the restriction.
+	RestrictionType string `json:"restriction_type"`
+
+	// Value used to evaluate the restriction.
+	// If the restriction_type is project, this will be the project UUID.
+	// If the restriction_type is expression, this will be the expression rule.
+	RestrictionValue string `json:"restriction_value"`
+}
