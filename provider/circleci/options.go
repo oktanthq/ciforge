@@ -288,3 +288,62 @@ type CreateContextRestrictionsBody struct {
 	// If the restriction_type is expression, this will be the expression rule.
 	RestrictionValue string `json:"restriction_value"`
 }
+
+// RollbackBody represents the request body for rolling back a component deployment.
+type RollbackBody struct {
+	// The component name
+	ComponentName string `json:"component_name"`
+
+	// The current version
+	CurrentVersion string `json:"current_version"`
+
+	// The environment name
+	EnvironmentName string `json:"environment_name"`
+
+	// The namespace
+	Namespace string `json:"namespace"`
+
+	// The extra parameters for the rollback pipeline
+	Parameters map[string]any `json:"parameters"`
+
+	// The reason for the rollback
+	Reason string `json:"reason"`
+
+	// The target version
+	TargetVersion string `json:"target_version"`
+}
+
+// CreateTriggerBody represents the request body for creating or updating a trigger.
+type CreateTriggerBody struct {
+	// 	The source of events to use for this trigger.
+	// The repo object must be specified when provider is github_app, github_server,
+	// or github_oauth, the webhook object may only be specified when provider is webhook,
+	// and the schedule object must be specified when provider is schedule.
+	EventSource EventSource `json:"event_source"`
+
+	// The event preset to use for this trigger.
+	EventPreset string `json:"event_preset"`
+
+	// The ref to use when checking out code for pipeline runs created from this trigger. Always required when event_source.provider
+	// is webhook or schedule. When event_source.provider is github_app or github_server, only expected if the event source repository
+	// (identified by event_source.repo.external_id) is different to the checkout source repository of the associated Pipeline Definition.
+	// Otherwise, must be omitted.
+	CheckoutRef string `json:"checkout_ref"`
+
+	// The ref to use when fetching config for pipeline runs created from this trigger.
+	// Always required when event_source.provider is webhook or schedule.
+	// When event_source.provider is github_app or github_server, only expected if the event source
+	// repository (identified by event_source.repo.external_id) is different to the config source repository of the associated Pipeline Definition.
+	// Otherwise, must be omitted.
+	ConfigRef string `json:"config_ref"`
+
+	// The name of the triggering event. Required when provider is webhook or schedule. Should not be set for other providers.
+	EventName string `json:"event_name"`
+
+	// Whether the trigger should be disabled upon creation. Not supported for triggers where event_source.provider is github_oauth.
+	Disabled bool `json:"disabled"`
+
+	// Pipeline parameters to pass when running pipelines from this trigger.
+	// Currently only supported for triggers where event_source.provider is schedule.
+	Parameters map[string]any `json:"parameters"`
+}

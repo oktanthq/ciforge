@@ -622,3 +622,98 @@ type listContextRestrictionResponse struct {
 	// Token that can be used to retrieve next page of results
 	NextPageToken string `json:"next_page_token"`
 }
+
+// RollbackResponse represents the response from a rollback operation.
+type RollbackResponse struct {
+	// The ID of the rollback pipeline or the command created to handle the rollback
+	ID string `json:"id"`
+
+	// The type of the rollback
+	RollbackType string `json:"rollback_type"`
+}
+
+// Repository represents a version control system repository.
+type Repository struct {
+	// The fully-qualified name of the repository.
+	FullName string `json:"full_name"`
+
+	// External identifier for the repository, as defined by the respective version control provider.
+	ExternalID string `json:"external_id"`
+}
+
+// Webhook represents a custom webhook event source for a trigger.
+type Webhook struct {
+	// The URL to use when triggering this webhook.
+	URL string `json:"url"`
+
+	// The name of the webhook sender.
+	Sender string `json:"sender"`
+}
+
+// AttributionActor represents the user that pipeline runs from a schedule trigger are attributed to.
+type AttributionActor *struct {
+	// The unique ID of the user that pipeline runs are attributed to.
+	ID string `json:"id"`
+}
+
+// Schedule represents a cron-based schedule event source for a trigger.
+type Schedule struct {
+	// The cron expression defining when this trigger fires.
+	CronExpression string `json:"cron_expression"`
+
+	// The actor that pipeline runs from this trigger are attributed to.
+	// On creation, callers supply current or system as a string; the response returns the resolved actor as an object containing their user ID.
+	AttributionActor AttributionActor `json:"attribution_actor"`
+}
+
+// EventSource represents the source of events that a trigger listens to.
+//
+// Contains a repo, webhook, or schedule depending on the provider type.
+type EventSource struct {
+	// The integration provider for this resource. One of github_app, github_server, github_oauth, webhook, or schedule.
+	Provider string `json:"provider"`
+
+	// Information pertaining to the repository used as a source of events for this trigger, if applicable.
+	Repo Repository `json:"repo"`
+
+	// Information pertaining to the custom webhook used as a source of events for this trigger, if applicable.
+	Webhook Webhook `json:"webhook"`
+
+	// Information pertaining to the schedule used as a source of events for this trigger, if applicable.
+	Schedule Schedule `json:"schedule"`
+}
+
+// PipelineDefinitionTrigger represents a trigger attached to a pipeline definition.
+//
+// Triggers define the events and sources that cause pipelines to run.
+type PipelineDefinitionTrigger struct {
+	// The unique ID of the trigger.
+	ID string `json:"id"`
+
+	// The name of the event that will trigger the pipeline.
+	Event string `json:"event"`
+
+	// The source of events to use for this trigger.
+	// Will contain either a repo, webhook, or schedule object depending on the provider.
+	// (The github_app, github_server, and github_oauth providers imply a repo, webhook implies a webhook, and schedule implies a schedule.)
+	EventSource EventSource `json:"event_source"`
+
+	// The name of the event preset to use when filtering events for this trigger.
+	// When event_source.provider is github_app or github_server, all preset values are supported.
+	// When event_source.provider is github_oauth, this field is required and only the following values are accepted: all-pushes, only-build-prs.
+	// Not applicable when event_source.provider is webhook or schedule.
+	EventPreset string `json:"event_preset"`
+
+	// The ref to use when checking out code for pipeline runs created from this trigger. If empty, the ref provided in the trigger event is used.
+	CheckoutRef string `json:"checkout_ref"`
+
+	// The ref to use when fetching config for pipeline runs created from this trigger. If empty, the ref provided in the trigger event is used.
+	ConfigRef string `json:"config_ref"`
+
+	// Whether the trigger is disabled. Not supported for triggers where event_source.provider is github_oauth.
+	Disabled bool `json:"disabled"`
+
+	// Pipeline parameters passed when running pipelines from this trigger.
+	// Currently only supported for triggers where event_source.provider is schedule.
+	Parameters map[string]any `json:"parameters"`
+}
