@@ -1,6 +1,10 @@
 package circleci
 
-import "github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+import (
+	"time"
+
+	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+)
 
 // SortDirection specifies the ordering of list results supported by the CircleCI API.
 type SortDirection = httpclient.SortDirection
@@ -346,4 +350,16 @@ type CreateTriggerBody struct {
 	// Pipeline parameters to pass when running pipelines from this trigger.
 	// Currently only supported for triggers where event_source.provider is schedule.
 	Parameters map[string]any `json:"parameters"`
+}
+
+// UsageExportBody represents the request body for creating a usage export job.
+type UsageExportBody struct {
+	// The start date & time (inclusive) of the range from which data will be pulled. Must be no more than one year ago.
+	Start time.Time `json:"start"`
+
+	// The end date & time (inclusive) of the range from which data will be pulled. Must be no more than 31 days after start.
+	End time.Time `json:"end"`
+
+	// array of UUIDs
+	SharedOrgIDs []string `json:"shared_org_ids"`
 }

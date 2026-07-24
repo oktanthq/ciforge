@@ -717,3 +717,33 @@ type PipelineDefinitionTrigger struct {
 	// Currently only supported for triggers where event_source.provider is schedule.
 	Parameters map[string]any `json:"parameters"`
 }
+
+// UsageExport represents a usage export job for an organization.
+type UsageExport struct {
+	// string that is a UUID
+	UsageExportJobID string `json:"usage_export_job_id"`
+
+	// Enum: "created" "processing" "failed" "completed"
+	State string `json:"state"`
+
+	Start time.Time `json:"start"`
+
+	End time.Time `json:"end"`
+
+	// A list of pre signed urls that the client can use to download the results of a Usage Export.
+	DownloadURLs []string `json:"download_urls"`
+}
+
+// usageExportResponse is the response from getting a usage export job.
+type usageExportResponse struct {
+	// string that is a UUID
+	UsageExportJobID string `json:"usage_export_job_id"`
+
+	// Enum: "created" "processing" "failed" "completed"
+	State string `json:"state"`
+
+	// A list of pre signed urls that the client can use to download the results of a Usage Export.
+	DownloadURLs []string `json:"download_urls"`
+
+	ErrorReason string `json:"error_reason"`
+}
