@@ -363,3 +363,51 @@ type UsageExportBody struct {
 	// array of UUIDs
 	SharedOrgIDs []string `json:"shared_org_ids"`
 }
+
+// ListWebhooksOptions configures filtering when listing webhooks.
+type ListWebhooksOptions struct {
+	// ID of the scope being used (at the moment, only project ID is supported).
+	ScopeID string `query:"scope-id"`
+
+	// Type of the scope being used (at the moment, only project is supported).
+	ScopeType string `query:"scope-type"`
+}
+
+// CreateWebhooksBody represents the request body for creating a webhook.
+type CreateWebhooksBody struct {
+	// Name of the webhook.
+	Name string `json:"name"`
+
+	// Events that will trigger the webhook.
+	Events []string `json:"events"`
+
+	// URL to deliver the webhook to. Note: protocol must be included as well (only https is supported).
+	URL string `json:"url"`
+
+	// Whether to enforce TLS certificate verification when delivering the webhook.
+	VerifyTLS bool `json:"verify-tls"`
+
+	// Secret used to build an HMAC hash of the payload and passed as a header in the webhook request.
+	SigningSecret string `json:"signing-secret"`
+
+	// The scope in which the relevant events that will trigger webhooks.
+	Scope Scope `json:"scope"`
+}
+
+// UpdateWebhookBody represents the request body for updating a webhook.
+type UpdateWebhookBody struct {
+	// Name of the webhook.
+	Name string `json:"name"`
+
+	// Events that will trigger the webhook.
+	Event []string `json:"event"`
+
+	// URL to deliver the webhook to. Note: protocol must be included as well (only https is supported).
+	URL string `json:"url"`
+
+	// Secret used to build an HMAC hash of the payload and passed as a header in the webhook request.
+	SigningSecret string `json:"signing-secret"`
+
+	// Whether to enforce TLS certificate verification when delivering the webhook.
+	VerifyTLS bool `json:"verify-tls"`
+}

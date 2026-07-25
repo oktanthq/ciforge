@@ -641,15 +641,6 @@ type Repository struct {
 	ExternalID string `json:"external_id"`
 }
 
-// Webhook represents a custom webhook event source for a trigger.
-type Webhook struct {
-	// The URL to use when triggering this webhook.
-	URL string `json:"url"`
-
-	// The name of the webhook sender.
-	Sender string `json:"sender"`
-}
-
 // AttributionActor represents the user that pipeline runs from a schedule trigger are attributed to.
 type AttributionActor *struct {
 	// The unique ID of the user that pipeline runs are attributed to.
@@ -746,4 +737,56 @@ type usageExportResponse struct {
 	DownloadURLs []string `json:"download_urls"`
 
 	ErrorReason string `json:"error_reason"`
+}
+
+// Scope represents the scope in which relevant events that will trigger webhooks.
+type Scope struct {
+	// ID of the scope being used (at the moment, only project ID is supported).
+	ID string `json:"id"`
+
+	// Type of the scope being used.
+	Type string `json:"type"`
+}
+
+// Webhook represents a CircleCI webhook.
+//
+// Webhooks deliver notifications about events (e.g., workflow-completed, job-completed)
+// to a specified URL via HTTPS.
+type Webhook struct {
+	// ID string jsonid
+	ID string `json:"id"`
+
+	// Name of the webhook.
+	Name string `json:"name"`
+
+	// URL to deliver the webhook to. Note: protocol must be included as well (only https is supported).
+	URL string `json:"url"`
+
+	// Whether to enforce TLS certificate verification when delivering the webhook.
+	VerifyTLS bool `json:"verify_tls"`
+
+	// Masked value of the secret used to build an HMAC hash of the payload and passed as a header in the webhook request.
+	SigningSecret string `json:"signing_secret"`
+
+	// Items Enum: "workflow-completed" "job-completed"
+	// Events that will trigger the webhook.
+	Events []string `json:"events"`
+
+	// The scope in which the relevant events that will trigger webhooks.
+	Scope Scope `json:"scope"`
+
+	// The date and time the webhook was created.
+	CreatedAt time.Time `json:"created_at"`
+
+	// The date and time the webhook was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// listWebhookResponse is the response from listing webhooks.
+type listWebhookResponse struct {
+	// Array of objects (Webhook)
+	Items []Webhook `json:"items"`
+
+	// A token to pass as a page-token query parameter to return the next page of results.
+	NextPageToken *string `json:"next_page_token"`
 }
