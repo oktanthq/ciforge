@@ -327,20 +327,28 @@ type TestResult struct {
 
 // Project represents a CircleCI project.
 type Project struct {
-	// Slug is the project slug (e.g., "gh/CircleCI-Public/circleci-cli").
+	// Project slug in the form vcs-slug/org-name/repo-name.
+	// The / characters may be URL-escaped.
+	// For projects that use GitLab or GitHub App, use circleci as the vcs-slug, replace org-name with the
+	// organization ID (found in Organization Settings), and replace repo-name with the project ID (found in Project Settings).
 	Slug string `json:"slug"`
 
 	// Name is the project name.
 	Name string `json:"name"`
 
+	ID string `json:"id"`
+
 	// OrganizationName is the organization name.
 	OrganizationName string `json:"organization_name"`
 
+	// The slug of the organization the project belongs to.
+	OrganizationSlug string `json:"organization_slug"`
+
+	// The id of the organization the project belongs to
+	OrganizationID string `json:"organization_id"`
+
 	// VCSInfo contains version control system information.
 	VCSInfo ProjectVCSInfo `json:"vcs_info"`
-
-	// DefaultBranch is the default branch of the project.
-	DefaultBranch string `json:"default_branch"`
 }
 
 // ProjectVCSInfo contains version control system information for a project.
@@ -348,8 +356,9 @@ type ProjectVCSInfo struct {
 	// VCSURL is the URL of the repository.
 	VCSURL string `json:"vcs_url"`
 
-	// ProviderName is the name of the VCS provider.
-	ProviderName string `json:"provider_name"`
+	// Enum: "Bitbucket" "CircleCI" "GitHub"
+	// The VCS provider
+	Provider string `json:"provider"`
 
 	// DefaultBranch is the default branch.
 	DefaultBranch string `json:"default_branch"`
@@ -789,4 +798,91 @@ type listWebhookResponse struct {
 
 	// A token to pass as a page-token query parameter to return the next page of results.
 	NextPageToken *string `json:"next_page_token"`
+}
+
+// CheckoutKey represents an SSH checkout key for a project.
+//
+// Checkout keys are used to check out code from version control systems.
+type CheckoutKey struct {
+	// A public SSH key.
+	PublicKey string `json:"public-key"`
+
+	// The type of checkout key. This may be either deploy-key or github-user-key.
+	Type string `json:"type"`
+
+	// An SSH key fingerprint.
+	Fingerprint string `json:"fingerprint"`
+
+	// A boolean value that indicates if this key is preferred.
+	Preferred bool `json:"preferred"`
+
+	// The date and time the checkout key was created.
+	CreatedAt time.Time `json:"created-at"`
+}
+
+// getAllCheckoutKeysResponse is the response from listing checkout keys.
+type getAllCheckoutKeysResponse struct {
+	Items []CheckoutKey `json:"items"`
+
+	NextPageToken *string `json:"next_page_token"`
+}
+
+// ProjectEnvVar represents an environment variable for a project.
+type ProjectEnvVar struct {
+	// The name of the environment variable.
+	Name string `json:"name"`
+
+	// The value of the environment variable.
+	Value string `json:"value"`
+
+	// The creation timestamp of the environment variable.
+	CreatedAt *time.Time `json:"created-at"`
+}
+
+// listProjectEnvVarsResponse is the response from listing project environment variables.
+type listProjectEnvVarsResponse struct {
+	Items []ProjectEnvVar `json:"items"`
+
+	// A token to pass as a page-token query parameter to return the next page of results.
+	NextPageToken *string `json:"next_page_token"`
+}
+
+// ProjectSettings represents the advanced settings for a CircleCI project.
+type ProjectSettings struct {
+	// Except for the default branch, cancel running pipelines on a branch when a new pipeline starts on that branch.
+	AutocancelBuilds bool `json:"autocancel_builds"`
+
+	// Run builds for pull requests from forks.
+	BuildForkPRs bool `json:"build_fork_prs"`
+
+	// Once enabled, we will only build branches that have associated pull requests open.
+	BuildPRsOnly bool `json:"build_prs_only"`
+
+	// When set to true, job re-runs with SSH debugging access will be disabled for the project.
+	DisableSSH bool `json:"disable_ssh"`
+
+	// Run builds for forked pull requests with this project's configuration, environment variables, and secrets.
+	ForksRecieveSecretEnvVars bool `json:"forks_receive_secret_env_vars"`
+
+	// Free and Open Source. Enabling this grants additional credits, and lets others see your builds, both through the web UI and the API.
+	OSS bool `json:"oss"`
+
+	// Report the status of every pushed commit to GitHub's status API. Updates reported per job.
+	SetGithubStatus bool `json:"set_github_status"`
+
+	// Enabling allows you to conditionally trigger configurations outside of the primary .circleci parent directory.
+	SetupWorkflows bool `json:"setup_workflows"`
+
+	// Whether updating these settings requires a user to be an organization administrator.
+	// When disabled, updating settings can be done by any member.
+	WriteSettingsRequiresAdmin bool `json:"write_settings_requires_admin"`
+
+	// This field is used in conjunction with the build_prs_only, it allows you to specify a list of branches that will always triger a build.
+	// The value passed will overwrite the existing value.
+	PROnlyBranchOverrides bool `json:"pr_only_branch_overrides"`
+}
+
+// projectSettingsResponse is the response from getting or updating project settings.
+type projectSettingsResponse struct {
+	Advanced ProjectSettings `json:"advanced"`
 }

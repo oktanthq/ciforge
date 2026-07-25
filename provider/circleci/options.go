@@ -9,6 +9,7 @@ import (
 // SortDirection specifies the ordering of list results supported by the CircleCI API.
 type SortDirection = httpclient.SortDirection
 
+// Supported sort directions for list results.
 const (
 	SortAscending  SortDirection = httpclient.SortAscending
 	SortDescending SortDirection = httpclient.SortDescending
@@ -24,6 +25,7 @@ func appendQueryParams(path string, opts any) string {
 // PipelineStatus filters pipelines by their current status.
 type PipelineStatus string
 
+// Pipeline status values for filtering pipelines.
 const (
 	PipelineStatusCreated      PipelineStatus = "created"
 	PipelineStatusErrored      PipelineStatus = "error"
@@ -40,6 +42,7 @@ const (
 // WorkflowStatus filters workflows by their current status.
 type WorkflowStatus string
 
+// Workflow status values for filtering workflows.
 const (
 	WorkflowStatusQueued       WorkflowStatus = "queued"
 	WorkflowStatusSetup        WorkflowStatus = "setup"
@@ -410,4 +413,38 @@ type UpdateWebhookBody struct {
 
 	// Whether to enforce TLS certificate verification when delivering the webhook.
 	VerifyTLS bool `json:"verify-tls"`
+}
+
+// CreateProjectBody represents the request body for creating a project.
+type CreateProjectBody struct {
+	// The name of the project
+	Name string `json:"name"`
+}
+
+// CheckoutKeyType specifies the type of checkout key.
+type CheckoutKeyType string
+
+// Supported checkout key types.
+const (
+	CheckoutKeyTypeUserKey   CheckoutKeyType = "user-key"
+	CheckoutKeyTypeDeployKey CheckoutKeyType = "deploy-key"
+)
+
+// CreateCheckoutKeyBody represents the request body for creating a checkout key.
+type CreateCheckoutKeyBody struct {
+	Type CheckoutKeyType `json:"type"`
+}
+
+// CreateProjectEnvVarBody represents the request body for creating a project environment variable.
+type CreateProjectEnvVarBody struct {
+	// The name of the environment variable.
+	Name string `json:"name"`
+
+	// The value of the environment variable.
+	Value string `json:"value"`
+}
+
+// UpdateProjectSettingsBody represents the request body for updating project settings.
+type UpdateProjectSettingsBody struct {
+	Advanced ProjectSettings `json:"advanced"`
 }
