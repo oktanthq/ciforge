@@ -20,31 +20,46 @@ func TestGetPipelineByID_Success(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{
   "id": "5034460f-c7c4-4c43-9457-de07e2029e7b",
-  "errors": [],
+  "errors": [
+    {
+      "type": "config",
+      "message": "string"
+    }
+  ],
   "project_slug": "gh/CircleCI-Public/api-preview-docs",
-  "updated_at": "2023-10-27T10:00:00Z",
-  "number": 123,
+  "updated_at": "2019-08-24T14:15:22Z",
+  "number": 25,
+  "trigger_parameters": {
+    "property1": "string",
+    "property2": "string"
+  },
   "state": "created",
-  "created_at": "2023-10-27T09:59:00Z",
+  "created_at": "2019-08-24T14:15:22Z",
+  "warnings": [
+    {
+      "type": "config-deprecated-syntax",
+      "message": "string"
+    }
+  ],
   "trigger": {
     "type": "scheduled_pipeline",
-    "received_at": "2023-10-27T09:59:00Z",
+    "received_at": "2019-08-24T14:15:22Z",
     "actor": {
-      "login": "octocat",
-      "avatar_url": "https://avatars.githubusercontent.com/u/583231?v=4"
+      "login": "string",
+      "avatar_url": "string"
     }
   },
   "vcs": {
     "provider_name": "GitHub",
     "target_repository_url": "https://github.com/CircleCI-Public/api-preview-docs",
-    "branch": "main",
+    "branch": "feature/design-new-api",
     "review_id": "123",
     "review_url": "https://github.com/CircleCI-Public/api-preview-docs/pull/123",
     "revision": "f454a02b5d10fcccfd7d9dd7608a76d6493a98b4",
     "tag": "v3.1.4159",
     "commit": {
-      "subject": "Update README",
-      "body": "Detailed description of the update."
+      "subject": "string",
+      "body": "string"
     },
     "origin_repository_url": "https://github.com/CircleCI-Public/api-preview-docs"
   }
@@ -56,28 +71,34 @@ func TestGetPipelineByID_Success(t *testing.T) {
 	pipeline, err := client.GetPipelineByID(context.Background(), "5034460f-c7c4-4c43-9457-de07e2029e7b")
 
 	assertNoError(t, err)
-	assertEqual(t, pipeline.ID, "5034460f-c7c4-4c43-9457-de07e2029e7b")
-	assertEqual(t, pipeline.State, "created")
-	assertEqual(t, pipeline.ProjectSlug, "gh/CircleCI-Public/api-preview-docs")
-	assertEqual(t, pipeline.Number, int64(123))
-	assertEqual(t, pipeline.Trigger.Type, "scheduled_pipeline")
-	assertEqual(t, pipeline.Trigger.Actor.Login, "octocat")
-	assertEqual(t, pipeline.VCS.ProviderName, "GitHub")
-	assertEqual(t, pipeline.VCS.Branch, "main")
-	assertEqual(t, pipeline.VCS.Revision, "f454a02b5d10fcccfd7d9dd7608a76d6493a98b4")
-	assertEqual(t, pipeline.VCS.Tag, "v3.1.4159")
-	assertEqual(t, pipeline.VCS.ReviewID, "123")
-	assertEqual(t, pipeline.VCS.ReviewURL, "https://github.com/CircleCI-Public/api-preview-docs/pull/123")
-	assertEqual(t, pipeline.VCS.OriginRepositoryURL, "https://github.com/CircleCI-Public/api-preview-docs")
+	assertEqual(t, "5034460f-c7c4-4c43-9457-de07e2029e7b", pipeline.ID)
+	assertEqual(t, "gh/CircleCI-Public/api-preview-docs", pipeline.ProjectSlug)
+	assertEqual(t, int64(25), pipeline.Number)
+	assertEqual(t, "created", pipeline.State)
+
+	if len(pipeline.Errors) != 1 {
+		t.Fatalf("errors len = %d, want 1", len(pipeline.Errors))
+	}
+	assertEqual(t, "config", pipeline.Errors[0].Type)
+
+	if len(pipeline.Warnings) != 1 {
+		t.Fatalf("warnings len = %d, want 1", len(pipeline.Warnings))
+	}
+	assertEqual(t, "config-deprecated-syntax", pipeline.Warnings[0].Type)
+
+	assertEqual(t, "scheduled_pipeline", pipeline.Trigger.Type)
+	assertEqual(t, "string", pipeline.Trigger.Actor.Login)
+
+	assertEqual(t, "GitHub", pipeline.VCS.ProviderName)
+	assertEqual(t, "feature/design-new-api", pipeline.VCS.Branch)
+	assertEqual(t, "v3.1.4159", pipeline.VCS.Tag)
+	assertEqual(t, "f454a02b5d10fcccfd7d9dd7608a76d6493a98b4", pipeline.VCS.Revision)
 }
 
 func TestGetPipelineByID_NotFound(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{
-  "message": "Entity not found."
-}`))
+		w.Write([]byte(`{"message": "Entity not found."}`))
 	}))
 	defer srv.Close()
 
