@@ -160,26 +160,47 @@ type PipelineError struct {
 // A workflow is a collection of jobs that are run in a defined order with
 // parallelism defined by the workflow configuration.
 type Workflow struct {
+	// The ID of the pipeline this workflow belongs to.
+	PipelineID string `json:"pipeline_id"`
+
+	// The ID of the user who canceled the workflow.
+	CanceledBy string `json:"canceled_by"`
+
 	// ID is the unique identifier of the workflow.
 	ID string `json:"id"`
+
+	// Present if this workflow was auto-rerun from a previous workflow. The Nth auto-rerun workflow will have auto_rerun_number N.
+	AutoRerunNumber int `json:"auto_rerun_number"`
 
 	// Name is the name of the workflow.
 	Name string `json:"name"`
 
+	// The project-slug for the pipeline this workflow belongs to.
+	ProjectSlug string `json:"project_slug"`
+
+	// The ID of the user associated with the error on the workflow.
+	ErroredBy string `json:"errored_by"`
+
+	// Tag used for the workflow.
+	Tag *string `json:"tag"`
+
 	// Status is the current status of the workflow.
 	Status string `json:"status"`
 
-	// CreatedAt is the timestamp when the workflow was created.
+	// The ID of the user who started the workflow.
+	StartedBy string `json:"started_by"`
+
+	// The maximum number of auto reruns specified for the workflow.
+	MaxAutoReruns int `json:"max_auto_reruns"`
+
+	// The number of the pipeline this workflow belongs to.
+	PipelineNumber int64 `json:"pipeline_number"`
+
+	// The date and time the workflow was created.
 	CreatedAt time.Time `json:"created_at"`
 
-	// StartedAt is the timestamp when the workflow started running.
-	StartedAt *time.Time `json:"started_at,omitempty"`
-
-	// StoppedAt is the timestamp when the workflow stopped running.
+	// The date and time the workflow stopped.
 	StoppedAt *time.Time `json:"stopped_at,omitempty"`
-
-	// PipelineID is the ID of the pipeline that contains this workflow.
-	PipelineID string `json:"pipeline_id"`
 }
 
 // Job represents a CircleCI job.
@@ -193,35 +214,26 @@ type Job struct {
 	// Name is the name of the job.
 	Name string `json:"name"`
 
+	// JobNumber is the job number (sequential within a project).
+	JobNumber int64 `json:"job_number,omitempty"`
+
+	// The type of the job.
+	Type string `json:"type"`
+
 	// Status is the current status of the job.
 	Status string `json:"status"`
+
+	ProjectID string `json:"project_id"`
+
+	PipelineID string `json:"pipeline_id"`
+
+	WorkflowID string `json:"workflow_id"`
 
 	// StartedAt is the timestamp when the job started running.
 	StartedAt *time.Time `json:"started_at,omitempty"`
 
 	// StoppedAt is the timestamp when the job stopped running.
 	StoppedAt *time.Time `json:"stopped_at,omitempty"`
-
-	// JobNumber is the job number (sequential within a project).
-	JobNumber int64 `json:"job_number,omitempty"`
-
-	// ProjectSlug is the project slug (e.g., "gh/CircleCI-Public/circleci-cli").
-	ProjectSlug string `json:"project_slug,omitempty"`
-
-	// DurationInMillis is the duration of the job in milliseconds.
-	DurationInMillis int64 `json:"duration_in_millis,omitempty"`
-
-	// ContainerCount is the number of containers used by the job.
-	ContainerCount int `json:"container_count,omitempty"`
-
-	// Executor is the executor used by the job.
-	Executor *JobExecutor `json:"executor,omitempty"`
-
-	// Source is the source of the job.
-	Source string `json:"source,omitempty"`
-
-	// Messages contains any messages associated with the job.
-	Messages []JobMessage `json:"messages,omitempty"`
 }
 
 // JobExecutor represents the executor used by a job.

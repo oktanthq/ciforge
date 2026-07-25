@@ -448,3 +448,20 @@ type CreateProjectEnvVarBody struct {
 type UpdateProjectSettingsBody struct {
 	Advanced ProjectSettings `json:"advanced"`
 }
+
+// RerunWorkflowBody represents the request body for rerunning a workflow.
+type RerunWorkflowBody struct {
+	// Whether to enable SSH access for the triggering user on the newly-rerun job.
+	// Requires the jobs parameter to be used and so is mutually exclusive with the from_failed parameter.
+	EnableSSH bool `json:"enable_ssh"`
+
+	// Whether to rerun the workflow from the failed job. Mutually exclusive with the jobs parameter.
+	FromFailed bool `json:"from_failed"`
+
+	// A list of job IDs to rerun.
+	Jobs []string `json:"jobs"`
+
+	// Completes rerun using sparse trees logic, an optimization for workflows that have disconnected subgraphs.
+	// Requires jobs parameter and so is mutually exclusive with the from_failed parameter.
+	SparseTree bool `json:"sparse_tree"`
+}
