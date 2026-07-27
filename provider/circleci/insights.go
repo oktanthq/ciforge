@@ -3,6 +3,7 @@ package circleci
 import (
 	"context"
 	"fmt"
+	"net/http"
 )
 
 // WorkflowMetrics represents metrics for a workflow.
@@ -113,7 +114,7 @@ func (c *Client) ListWorkflowMetrics(ctx context.Context, projectSlug string, op
 	path = appendQueryParams(path, opts)
 
 	var resp workflowMetricsListResponse
-	if err := c.do(ctx, "GET", path, nil, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list workflow metrics: %w", err)
 	}
 	return resp.Items, nil
@@ -139,7 +140,7 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, projectSlug, workflowName
 	path = appendQueryParams(path, opts)
 
 	var resp workflowRunsListResponse
-	if err := c.do(ctx, "GET", path, nil, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list workflow runs: %w", err)
 	}
 	return resp.Items, nil
@@ -165,7 +166,7 @@ func (c *Client) ListJobMetrics(ctx context.Context, projectSlug, workflowName s
 	path = appendQueryParams(path, opts)
 
 	var resp workflowMetricsListResponse
-	if err := c.do(ctx, "GET", path, nil, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to list job metrics: %w", err)
 	}
 	return resp.Items, nil

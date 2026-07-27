@@ -65,7 +65,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, pipelineID string) (Pipeli
 	path := fmt.Sprintf("/pipeline/%s", pipelineID)
 
 	var resp Pipeline
-	if err := c.do(ctx, "GET", path, nil, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return Pipeline{}, fmt.Errorf("failed to get pipeline: %w", err)
 	}
 	return resp, nil
@@ -131,7 +131,7 @@ func (c *Client) TriggerPipeline(ctx context.Context, projectSlug string, body T
 	path := fmt.Sprintf("/project/%s/pipeline", projectSlug)
 
 	var resp triggerPipelineResponse
-	if err := c.do(ctx, "POST", path, body, &resp); err != nil {
+	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
 		return fmt.Errorf("failed to trigger pipeline: %w", err)
 	}
 	return nil
