@@ -211,3 +211,43 @@ func TestListPipeline_Failed(t *testing.T) {
 
 	assertError(t, err)
 }
+
+func TestContinuePipeline_Success(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assertPath(t, r, "/pipeline/continue")
+		assertMethod(t, r, http.MethodPost)
+		assertAuth(t, r)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{ "message": "Pipeline continued successfully." }`))
+	}))
+	defer srv.Close()
+
+	client := circleci.New("test-token", circleci.WithBaseURL(srv.URL), circleci.WithHTTPClient(srv.Client()))
+	err := client.ContinuePipeline(context.Background(), &circleci.ContinuePipelineBody{
+		ContinuationKey: "5034460f-c7c4-4c43-9457-de07e2029e7b",
+		Configuration:   "version: 2.1",
+	})
+
+	assertNoError(t, err)
+}
+
+func TestContinuePipeline_Failed(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assertPath(t, r, "/pipeline/continue")
+		assertMethod(t, r, http.MethodPost)
+		assertAuth(t, r)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message": "Internal Server Error"}`))
+	}))
+	defer srv.Close()
+
+	client := circleci.New("test-token", circleci.WithBaseURL(srv.URL), circleci.WithHTTPClient(srv.Client()))
+	err := client.ContinuePipeline(context.Background(), &circleci.ContinuePipelineBody{
+		ContinuationKey: "5034460f-c7c4-4c43-9457-de07e2029e7b",
+		Configuration:   "version: 2.1",
+	})
+
+	assertError(t, err)
+}
