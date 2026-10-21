@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/abdulahshoaib/ciforge/provider/github"
+	"github.com/oktanthq/ciforge/provider/github"
 )
 
 func TestListArtifacts(t *testing.T) {

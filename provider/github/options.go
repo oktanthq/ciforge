@@ -1,6 +1,6 @@
 package github
 
-import "github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+import "github.com/oktanthq/ciforge/provider/internal/httpclient"
 
 // SortDirection specifies the ordering of list results supported by the GitHub API.
 type SortDirection = httpclient.SortDirection

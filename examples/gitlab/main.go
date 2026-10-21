@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	gl "github.com/abdulahshoaib/ciforge/provider/gitlab"
+	gl "github.com/oktanthq/ciforge/provider/gitlab"
 )
 
 // Demonstrates GitLab CI/CD API operations using the ciforge GitLab provider.
