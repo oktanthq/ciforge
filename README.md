@@ -41,8 +41,6 @@ import (
 )
 ```
 
-> **Note:** `go.mod` still declares `module github.com/abdulahshoaib/ciforge`, so `go get github.com/oktanthq/ciforge` will not resolve until the module path is updated. That change is tracked in [#3](https://github.com/oktanthq/ciforge/issues/3). Until then, import paths in this README show the intended `github.com/oktanthq/ciforge` location.
-
 Requires Go 1.26.3 or later (see `go.mod`).
 
 ## Quick start
@@ -204,7 +202,6 @@ Please keep changes scoped. Provider APIs should stay on the shared `provider/in
 ### Docs & packaging
 
 - [#2](https://github.com/oktanthq/ciforge/issues/2) — Add a LICENSE
-- [#3](https://github.com/oktanthq/ciforge/issues/3) — Fix the Go module path to `github.com/oktanthq/ciforge`
 
 ### Test coverage & CI
 

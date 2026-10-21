@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+	"github.com/oktanthq/ciforge/provider/internal/httpclient"
 )
 
 // Sentinel errors for common API failure modes.

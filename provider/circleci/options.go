@@ -3,7 +3,7 @@ package circleci
 import (
 	"time"
 
-	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+	"github.com/oktanthq/ciforge/provider/internal/httpclient"
 )
 
 // SortDirection specifies the ordering of list results supported by the CircleCI API.

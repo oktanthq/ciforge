@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	gh "github.com/abdulahshoaib/ciforge/provider/github"
+	gh "github.com/oktanthq/ciforge/provider/github"
 )
 
 // Demonstrates GitHub Actions API operations using the ciforge GitHub provider.

@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/abdulahshoaib/ciforge/provider/github"
+	"github.com/oktanthq/ciforge/provider/github"
 )
 
 func TestAuthHeaders(t *testing.T) {

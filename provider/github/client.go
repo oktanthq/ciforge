@@ -3,7 +3,7 @@ package github
 import (
 	"net/http"
 
-	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+	"github.com/oktanthq/ciforge/provider/internal/httpclient"
 )
 
 // DefaultBaseURL is the default GitHub REST API endpoint used by the client.

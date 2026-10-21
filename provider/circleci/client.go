@@ -3,7 +3,7 @@ package circleci
 import (
 	"net/http"
 
-	"github.com/abdulahshoaib/ciforge/provider/internal/httpclient"
+	"github.com/oktanthq/ciforge/provider/internal/httpclient"
 )
 
 // DefaultBaseURL is the default CircleCI REST API endpoint used by the client.
