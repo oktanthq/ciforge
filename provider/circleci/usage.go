@@ -15,7 +15,7 @@ import (
 //
 // Returns the usage export job or an error if the request fails.
 func (c *Client) CreateUsageExport(ctx context.Context, orgID string, body UsageExportBody) (UsageExport, error) {
-	path := fmt.Sprintf("organizations/%s/usage_export_job", orgID)
+	path := fmt.Sprintf("/organizations/%s/usage_export_job", orgID)
 
 	var resp UsageExport
 	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
@@ -33,11 +33,11 @@ func (c *Client) CreateUsageExport(ctx context.Context, orgID string, body Usage
 //
 // Returns the usage export response or an error if the request fails.
 func (c *Client) GetUsageExport(ctx context.Context, orgID, usageExpJobID string) (usageExportResponse, error) {
-	path := fmt.Sprintf("organizations/%s/usage_export_job/%s", orgID, usageExpJobID)
+	path := fmt.Sprintf("/organizations/%s/usage_export_job/%s", orgID, usageExpJobID)
 
 	var resp usageExportResponse
-	if err := c.do(ctx, http.MethodPost, path, nil, &resp); err != nil {
-		return usageExportResponse{}, fmt.Errorf("failed to create usage export: %w", err)
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
+		return usageExportResponse{}, fmt.Errorf("failed to get usage export: %w", err)
 	}
 	return resp, nil
 }

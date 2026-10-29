@@ -104,9 +104,11 @@ type WorkflowID string
 func (c *Client) RerunWorkflow(ctx context.Context, workflowID string, body RerunWorkflowBody) (WorkflowID, error) {
 	path := fmt.Sprintf("/workflow/%s/rerun", workflowID)
 
-	var resp WorkflowID
+	var resp struct {
+		WorkflowID WorkflowID `json:"workflow_id"`
+	}
 	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
 		return "", fmt.Errorf("failed to approve workflow: %w", err)
 	}
-	return resp, nil
+	return resp.WorkflowID, nil
 }

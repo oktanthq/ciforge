@@ -38,7 +38,7 @@ func (c *Client) CreateContext(ctx context.Context, body ContextBody) (Context, 
 // Returns the list of contexts or an error if the request fails.
 func (c *Client) ListContexts(ctx context.Context, opts ListContextOptions) ([]Context, error) {
 	path := "/context"
-	appendQueryParams(path, opts)
+	path = appendQueryParams(path, opts)
 
 	var resp listContextResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -90,7 +90,7 @@ func (c *Client) DeleteContext(ctx context.Context, contextID string) error {
 // Returns the list of environment variables or an error if the request fails.
 func (c *Client) ListEnvironmentVariables(ctx context.Context, contextID string, opts ListEnvVarOptions) ([]EnvVar, error) {
 	path := fmt.Sprintf("/context/%s/environment-variable", contextID)
-	appendQueryParams(path, opts)
+	path = appendQueryParams(path, opts)
 
 	var resp listEnvVarsResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -181,7 +181,7 @@ func (c *Client) CreateContextRestrictions(ctx context.Context, contextID string
 func (c *Client) DeleteContextRestrictions(ctx context.Context, contextID, restrictionID string) error {
 	path := fmt.Sprintf("/context/%s/restrictions/%s", contextID, restrictionID)
 
-	if err := c.do(ctx, http.MethodPost, path, nil, nil); err != nil {
+	if err := c.do(ctx, http.MethodDelete, path, nil, nil); err != nil {
 		return fmt.Errorf("failed to delete context{%s} restriction{%s}: %w", contextID, restrictionID, err)
 	}
 	return nil

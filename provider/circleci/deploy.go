@@ -18,6 +18,7 @@ import (
 // returns a non-success status.
 func (c *Client) ListEnvironments(ctx context.Context, opts ListEnvironmentsOptions) ([]Environment, error) {
 	path := "/deploy/environments"
+	path = appendQueryParams(path, opts)
 
 	var resp listEnvironmentResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
@@ -58,6 +59,7 @@ func (c *Client) GetEnvironment(ctx context.Context, envID string) (Environment,
 // returns a non-success status.
 func (c *Client) ListComponents(ctx context.Context, opts ListComponentsOptions) ([]Component, error) {
 	path := "/deploy/component"
+	path = appendQueryParams(path, opts)
 
 	var resp listComponentsResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {

@@ -18,7 +18,7 @@ import (
 // Returns the created project or an error if the request fails or the API
 // returns a non-success status.
 func (c *Client) CreateProject(ctx context.Context, orgSlugID string, body CreateProjectBody) (Project, error) {
-	path := fmt.Sprintf("organization/%s/project", orgSlugID)
+	path := fmt.Sprintf("/organization/%s/project", orgSlugID)
 
 	var resp Project
 	if err := c.do(ctx, http.MethodPost, path, body, &resp); err != nil {
