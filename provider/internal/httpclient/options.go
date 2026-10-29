@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // SortDirection specifies the ordering of list results supported by CI APIs.
@@ -80,5 +81,9 @@ func AppendQueryParams(path string, opts any) string {
 		return path
 	}
 
-	return path + "?" + q.Encode()
+	sep := "?"
+	if strings.Contains(path, "?") {
+		sep = "&"
+	}
+	return path + sep + q.Encode()
 }
