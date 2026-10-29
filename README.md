@@ -1,5 +1,7 @@
 # ciforge
 
+[![CI](https://github.com/oktanthq/ciforge/actions/workflows/ci.yml/badge.svg)](https://github.com/oktanthq/ciforge/actions/workflows/ci.yml)
+
 ciforge is a Go library for talking to CI provider APIs. Each provider is its own package; they share an internal HTTP client for authentication, request execution, and common error mapping.
 
 Today that means:
@@ -175,7 +177,11 @@ The CircleCI package also covers workflows, jobs, contexts, projects, webhooks, 
 
 ## Tests
 
-GitHub currently has httptest coverage under `provider/github/github_test`. GitLab and CircleCI do not ([#4](https://github.com/oktanthq/ciforge/issues/4), [#5](https://github.com/oktanthq/ciforge/issues/5)).
+httptest coverage lives next to each provider:
+
+- GitHub Actions: `provider/github/github_test`
+- GitLab CI: `provider/gitlab/gitlab_test`
+- CircleCI: `provider/circleci/circleci_test`
 
 ```bash
 go test ./...
