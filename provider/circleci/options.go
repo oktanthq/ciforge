@@ -258,24 +258,24 @@ type ListContextOptions struct {
 	// Specify either owner/organization ID or the owner/organization slug.
 	// Find the organization ID and slug in the CircleCI web app (Organization Settings > Overview).
 	// Owner/organization slug is not supported for CircleCI server.
-	OwnerID string `json:"owner-id"`
+	OwnerID string `query:"owner-id"`
 
 	// A string that represents an organization. This is the organization slug.
 	// Specify either this or organization/owner ID. Find the organization ID and slug in the CircleCI web app (Organization Settings > Overview).
 	// Owner/organization slug is not supported for CircleCI server.
-	OwnerSlug string `json:"owner-slug"`
+	OwnerSlug string `query:"owner-slug"`
 
 	// The type of the owner. Defaults to "organization". Use "account" if you are using CircleCI server.
-	OwnerType string `json:"owner-type"`
+	OwnerType string `query:"owner-type"`
 
 	// A token to specify which page of results to fetch.
-	PageToken string `json:"page-token"`
+	PageToken string `query:"page-token"`
 }
 
 // ListEnvVarOptions configures pagination when listing environment variables.
 type ListEnvVarOptions struct {
 	// A token to specify which page of results to fetch.
-	PageToken string `json:"page-token"`
+	PageToken string `query:"page-token"`
 }
 
 // UpsertEnvVarBody represents the request body for creating or updating an environment variable.

@@ -1,0 +1,36 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - "-QF1008"
+        - "-ST1000"
+        - "-ST1020"
+        - "-ST1021"
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+      - path: provider/github/logs.go
+        linters:
+          - errcheck
+      - path: provider/internal/httpclient/http.go
+        linters:
+          - errcheck
+      - path: provider/circleci/dto.go
+        linters:
+          - unused
+      - path: provider/circleci/http.go
+        linters:
+          - unused

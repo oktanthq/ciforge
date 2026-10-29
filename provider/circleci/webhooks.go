@@ -18,7 +18,7 @@ import (
 // returns a non-success status.
 func (c *Client) ListWebhooks(ctx context.Context, opts ListWebhooksOptions) ([]Webhook, error) {
 	path := "/webhook"
-	appendQueryParams(path, opts)
+	path = appendQueryParams(path, opts)
 
 	var resp listWebhookResponse
 	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
